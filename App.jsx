@@ -33,6 +33,7 @@ import VideoSyllabusDashboard from "./components/VideoSyllabusDashboard";
 import VideoSyllabusEntry from "./components/VideoSyllabusEntry";
 import VideoSyllabusPurchase from "./components/VideoSyllabusPurchase";
 import SuperUserDashboard from "./components/SuperUserDashboard";
+import MainExam from "./components/MainExam"
 
 const Stack = createNativeStackNavigator();
 
@@ -73,6 +74,7 @@ export default function App() {
           <Stack.Screen name="VideoSyllabusEntry" component={VideoSyllabusEntry} />
           <Stack.Screen name="VideoSyllabusPurchase" component={VideoSyllabusPurchase} />
           <Stack.Screen name="SuperUserDashboard" component={SuperUserDashboard} />
+          <Stack.Screen name="MainExam" component={MainExam} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

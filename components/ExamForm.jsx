@@ -12,10 +12,11 @@ import {
   StatusBar,
   Platform,
   Modal,
+  RefreshControl,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { EventSourcePolyfill } from 'event-source-polyfill';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_BASE_URL from './ApiConfig';
 
 const ExamForm = ({ navigation }) => {
@@ -44,6 +45,7 @@ const ExamForm = ({ navigation }) => {
   const [showExamPicker, setShowExamPicker] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedDate, setSelectedDate] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
@@ -58,32 +60,70 @@ const ExamForm = ({ navigation }) => {
   });
 
   useEffect(() => {
-    const eventSource = new EventSourcePolyfill(`${API_BASE_URL}/api/exams`);
+    fetchExams();
+    
+    // Set up interval to periodically check for exam updates
+    const interval = setInterval(() => {
+      fetchExams();
+    }, 30000); // Check every 30 seconds
 
-    eventSource.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      if (response.success) {
-        const formattedExams = response.data.map((exam) => ({
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchExams = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/exams/json`);
+      const data = await response.json();
+      
+      if (data.success) {
+        const formattedExams = data.data.map((exam) => ({
           ...exam,
           startTime: formatTimeString(exam.startTime),
           endTime: formatTimeString(exam.endTime),
         }));
         setExams(formattedExams);
-        setLoading(false);
+        setError(null);
+        
+        // Store exams locally for offline access
+        await AsyncStorage.setItem('availableExams', JSON.stringify(formattedExams));
       } else {
         setError('Failed to load exams');
-        setLoading(false);
+        // Try to load from local storage if API fails
+        await loadStoredExams();
       }
-    };
-
-    eventSource.onerror = () => {
-      setError('Failed to connect to exam updates');
+    } catch (error) {
+      console.error('Error fetching exams:', error);
+      setError('Failed to connect to exam server');
+      // Try to load from local storage if API fails
+      await loadStoredExams();
+    } finally {
       setLoading(false);
-      eventSource.close();
-    };
+      setRefreshing(false);
+    }
+  };
 
-    return () => eventSource.close();
-  }, []);
+  const loadStoredExams = async () => {
+    try {
+      const storedExams = await AsyncStorage.getItem('availableExams');
+      if (storedExams) {
+        setExams(JSON.parse(storedExams));
+        Toast.show({
+          type: 'info',
+          text1: 'Offline Mode',
+          text2: 'Using cached exam data',
+          position: 'bottom',
+          visibilityTime: 3000,
+        });
+      }
+    } catch (storageError) {
+      console.error('Error loading stored exams:', storageError);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchExams();
+  };
 
   const formatTimeString = (timeStr) => {
     try {
@@ -321,6 +361,22 @@ const ExamForm = ({ navigation }) => {
     return `${exam.id} - ${exam.date}`;
   };
 
+  if (loading && exams.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <StatusBar barStyle="light-content" backgroundColor="#1a3b5d" />
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Exam Application Form</Text>
+          <Text style={styles.headerSubtitle}>Live Exam Registration</Text>
+        </View>
+        <View style={styles.loadingContent}>
+          <ActivityIndicator size="large" color="#1a3b5d" />
+          <Text style={styles.loadingText}>Loading available exams...</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1a3b5d" />
@@ -335,7 +391,22 @@ const ExamForm = ({ navigation }) => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            colors={['#1a3b5d']}
+            tintColor="#1a3b5d"
+          />
+        }
       >
+        {error && (
+          <View style={styles.errorBanner}>
+            <Icon name="error" size={20} color="#fff" />
+            <Text style={styles.errorBannerText}>{error}</Text>
+          </View>
+        )}
+
         {/* Exam Selection */}
         <View style={styles.section}>
           <Text style={styles.label}>Select Exam *</Text>
@@ -742,6 +813,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  loadingContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
   header: {
     backgroundColor: '#1a3b5d',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 20 : 50,
@@ -768,6 +853,21 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 16,
+  },
+  errorBanner: {
+    backgroundColor: '#ff4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorBannerText: {
+    color: '#fff',
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '500',
+    flex: 1,
   },
   section: {
     marginBottom: 20,
