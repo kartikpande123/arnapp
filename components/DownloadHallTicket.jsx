@@ -400,7 +400,7 @@ const DownloadHallTicket = () => {
       const { candidate } = res.data;
 
       if (!candidate) {
-        setError('No candidate found with this ID');
+        setError('No candidate found with this Registration ID');
         setLoading(false);
         return;
       }
@@ -415,7 +415,12 @@ const DownloadHallTicket = () => {
       );
     } catch (err) {
       console.error(err);
-      setError('Failed to generate hall ticket. Please try again.');
+      // Check if it's a 404 error (user not found)
+      if (err.response && err.response.status === 404) {
+        setError('No candidate found with this Registration ID');
+      } else {
+        setError('Failed to generate hall ticket. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

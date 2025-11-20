@@ -17,6 +17,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
+import API_BASE_URL from './ApiConfig';
 
 const SecurePdfViewer = ({ route, navigation }) => {
   const { syllabus, studentName } = route.params || {};
@@ -26,10 +27,11 @@ const SecurePdfViewer = ({ route, navigation }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [pdfSource, setPdfSource] = useState(null);
-  const [showControls, setShowControls] = useState(false); // Start with controls hidden for full screen
+  const [showControls, setShowControls] = useState(false);
   const [scale, setScale] = useState(1.0);
   const [dimensions, setDimensions] = useState(Dimensions.get('window'));
   const [isLandscape, setIsLandscape] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   const pdfRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
@@ -60,28 +62,74 @@ const SecurePdfViewer = ({ route, navigation }) => {
         clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, []);
+  }, [retryCount]); // Add retryCount as dependency to reload on retry
 
   const checkOrientation = (dim) => {
     const isLandscapeMode = dim.width > dim.height;
     setIsLandscape(isLandscapeMode);
-    
-    // Auto-hide controls in both landscape and portrait for full-screen experience
     setShowControls(false);
   };
 
-  const loadPdf = async () => {
+  // NEW: Fetch PDF URL from API like web component
+  const fetchPdfUrlFromApi = async () => {
     try {
       setLoading(true);
       setError('');
 
-      if (!syllabus || !syllabus.syllabusFileUrl) {
-        throw new Error('Invalid PDF URL');
+      if (!syllabus) {
+        throw new Error('No syllabus selected');
       }
 
-      // Set PDF source with headers for security
+      console.log('Fetching PDF from API for syllabus:', syllabus.syllabusTitle);
+
+      // Fetch all syllabi from API like web component does
+      const response = await fetch(`${API_BASE_URL}/api/pdf-syllabi`, {
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch syllabi: ${response.status}`);
+      }
+      
+      const allSyllabi = await response.json();
+      
+      // Find the selected syllabus in the API response
+      let foundSyllabus = null;
+      
+      Object.keys(allSyllabi).forEach(category => {
+        Object.keys(allSyllabi[category]).forEach(title => {
+          if (
+            title === syllabus.syllabusTitle && 
+            category === syllabus.syllabusCategory
+          ) {
+            foundSyllabus = allSyllabi[category][title];
+          }
+        });
+      });
+      
+      if (!foundSyllabus) {
+        throw new Error('Selected syllabus not found in API');
+      }
+      
+      if (foundSyllabus.fileError) {
+        throw new Error('This syllabus file is currently unavailable');
+      }
+      
+      // Use the fileUrl from API response
+      const pdfUrl = foundSyllabus.fileUrl;
+      
+      if (!pdfUrl) {
+        throw new Error('No PDF URL found in API response');
+      }
+
+      console.log('PDF URL from API:', pdfUrl);
+
+      // Set PDF source with the URL from API
       setPdfSource({
-        uri: syllabus.syllabusFileUrl,
+        uri: pdfUrl,
         cache: true,
         headers: {
           'User-Agent': 'SecurePdfViewer/1.0',
@@ -96,15 +144,47 @@ const SecurePdfViewer = ({ route, navigation }) => {
       });
 
     } catch (err) {
-      console.error('Error loading PDF:', err);
-      setError(err.message || 'Failed to load PDF');
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: 'Failed to load PDF',
-      });
+      console.error('PDF setup error:', err);
+      
+      // Fallback: Try using the syllabusFileUrl directly if API fails
+      if (syllabus?.syllabusFileUrl && retryCount === 0) {
+        console.log('Trying fallback with syllabusFileUrl:', syllabus.syllabusFileUrl);
+        setPdfSource({
+          uri: syllabus.syllabusFileUrl,
+          cache: true,
+          headers: {
+            'User-Agent': 'SecurePdfViewer/1.0',
+          }
+        });
+        setRetryCount(1); // Prevent infinite retry loop
+      } else {
+        setError(err.message || 'Failed to load PDF');
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to load PDF',
+        });
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPdf = async () => {
+    // For super users or syllabuses that come from collection, use direct URL
+    if (syllabus?.isFromCollection && syllabus?.syllabusFileUrl) {
+      console.log('Using direct URL for collection syllabus:', syllabus.syllabusFileUrl);
+      setPdfSource({
+        uri: syllabus.syllabusFileUrl,
+        cache: true,
+        headers: {
+          'User-Agent': 'SecurePdfViewer/1.0',
+        }
+      });
+      setLoading(false);
+    } else {
+      // For normal users, fetch from API like web component
+      await fetchPdfUrlFromApi();
     }
   };
 
@@ -156,13 +236,29 @@ const SecurePdfViewer = ({ route, navigation }) => {
 
   const handleError = (error) => {
     console.error('PDF Error:', error);
-    setError('Failed to load PDF. Please check your connection.');
-    setLoading(false);
-    Toast.show({
-      type: 'error',
-      text1: 'PDF Error',
-      text2: 'Failed to load PDF document',
-    });
+    
+    // Enhanced error handling with retry logic
+    if (retryCount < 2) {
+      setError(`Loading PDF... (Retry ${retryCount + 1}/2)`);
+      setTimeout(() => {
+        setRetryCount(prev => prev + 1);
+      }, 1000);
+    } else {
+      setError('Failed to load PDF. Please check your connection and try again.');
+      setLoading(false);
+      Toast.show({
+        type: 'error',
+        text1: 'PDF Error',
+        text2: 'Failed to load PDF document',
+      });
+    }
+  };
+
+  const handleRetry = () => {
+    setRetryCount(0);
+    setError('');
+    setLoading(true);
+    setPdfSource(null);
   };
 
   const goToNextPage = () => {
@@ -195,7 +291,7 @@ const SecurePdfViewer = ({ route, navigation }) => {
     setScale(1.0);
   };
 
-  if (error) {
+  if (error && !loading) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#e74c3c" />
@@ -218,7 +314,8 @@ const SecurePdfViewer = ({ route, navigation }) => {
           <Icon name="alert-circle" size={64} color="#e74c3c" />
           <Text style={styles.errorTitle}>Failed to Load PDF</Text>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadPdf}>
+          
+          <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
             <LinearGradient
               colors={['#3498db', '#2980b9']}
               style={styles.retryButtonGradient}
@@ -226,6 +323,13 @@ const SecurePdfViewer = ({ route, navigation }) => {
               <Icon name="refresh" size={20} color="#fff" />
               <Text style={styles.retryButtonText}>Retry</Text>
             </LinearGradient>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.secondaryButton} 
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.secondaryButtonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
 
@@ -270,7 +374,7 @@ const SecurePdfViewer = ({ route, navigation }) => {
             onPress={() => {
               Alert.alert(
                 'PDF Information',
-                `Title: ${syllabus?.syllabusTitle || 'N/A'}\nCategory: ${syllabus?.syllabusCategory || 'N/A'}\nPages: ${totalPages || 'Loading...'}`,
+                `Title: ${syllabus?.syllabusTitle || 'N/A'}\nCategory: ${syllabus?.syllabusCategory || 'N/A'}\nPages: ${totalPages || 'Loading...'}\nSource: ${syllabus?.isFromCollection ? 'Collection' : 'API'}`,
                 [{ text: 'OK' }]
               );
             }}
@@ -282,7 +386,14 @@ const SecurePdfViewer = ({ route, navigation }) => {
 
       {/* PDF Viewer - Full screen container */}
       <View style={styles.pdfMainContainer}>
-        {pdfSource ? (
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3498db" />
+            <Text style={styles.loadingText}>
+              {retryCount > 0 ? `Loading PDF... (Attempt ${retryCount + 1})` : 'Loading PDF...'}
+            </Text>
+          </View>
+        ) : pdfSource ? (
           <Pdf
             ref={pdfRef}
             trustAllCerts={false}
@@ -305,7 +416,7 @@ const SecurePdfViewer = ({ route, navigation }) => {
             renderActivityIndicator={() => (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#3498db" />
-                <Text style={styles.loadingText}>Loading PDF...</Text>
+                <Text style={styles.loadingText}>Rendering PDF...</Text>
               </View>
             )}
           />
@@ -317,7 +428,7 @@ const SecurePdfViewer = ({ route, navigation }) => {
         )}
 
         {/* Watermark Overlay */}
-        {currentPage > 1 && (
+        {currentPage > 0 && pdfSource && (
           <View style={styles.watermarkContainer} pointerEvents="none">
             <Text style={styles.watermark}>
               {studentName || 'Secure Viewing'}
@@ -389,7 +500,7 @@ const SecurePdfViewer = ({ route, navigation }) => {
           <View style={styles.securityNotice}>
             <Icon name="shield-check" size={16} color="#27ae60" />
             <Text style={styles.securityText}>
-              Secure viewing enabled • Screenshots prevented
+              Secure viewing enabled • {syllabus?.isFromCollection ? 'Collection' : 'API'} Source
             </Text>
           </View>
         </View>
@@ -478,6 +589,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     opacity: 0.05,
+    pointerEvents: 'none',
   },
   watermark: {
     fontSize: 28,
@@ -597,6 +709,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     elevation: 2,
+    marginBottom: 12,
   },
   retryButtonGradient: {
     flexDirection: 'row',
@@ -610,6 +723,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  secondaryButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  secondaryButtonText: {
+    color: '#3498db',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -232,7 +232,7 @@ const UpcomingExams = ({ navigation }) => {
 
       {upcomingExams.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📅</Text>
+          <Text style={styles.emptyIcon}>❌</Text>
           <Text style={styles.emptyText}>No upcoming exams scheduled</Text>
           <Text style={styles.emptySubtext}>Check back later for new exams</Text>
         </View>

@@ -1,0 +1,367 @@
+import { StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+  },
+  loadingContainer: {
+    flex: 1,
+  },
+  loadingGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 18,
+    marginTop: 20,
+    fontWeight: '700',
+  },
+  loadingSubtext: {
+    color: '#e0e7ff',
+    fontSize: 14,
+    marginTop: 8,
+    fontWeight: '400',
+  },
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 10 : 50,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  headerContent: {
+    gap: 12,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  examTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    flex: 1,
+    marginRight: 12,
+  },
+  timerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.3)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  timerWarning: {
+    backgroundColor: 'rgba(239, 68, 68, 0.95)',
+  },
+  timerText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  progressBarContainer: {
+    marginTop: 8,
+  },
+  progressBarBackground: {
+    height: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#10b981',
+    borderRadius: 3,
+  },
+  progressTextContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 6,
+  },
+  progressText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  progressPercentage: {
+    color: '#e0e7ff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 120,
+  },
+  questionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  questionBadge: {
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 2,
+  },
+  badgeGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 6,
+  },
+  badgeIcon: {
+    marginRight: 2,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  questionText: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#111827',
+    lineHeight: 26,
+    marginBottom: 20,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    backgroundColor: '#f9fafb',
+    borderRadius: 12,
+    padding: 12,
+  },
+  questionImage: {
+    width: width - 80,
+    height: 200,
+    borderRadius: 8,
+  },
+  optionsContainer: {
+    gap: 12,
+  },
+  optionBox: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  optionBoxSelected: {
+    borderColor: '#3b82f6',
+    backgroundColor: '#eff6ff',
+    elevation: 4,
+    shadowOpacity: 0.1,
+  },
+  optionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  optionRadio: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#d1d5db',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  optionRadioSelected: {
+    borderColor: '#3b82f6',
+    backgroundColor: '#3b82f6',
+  },
+  optionRadioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+  },
+  optionLabelContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f3f4f6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  optionLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#6b7280',
+  },
+  optionLabelSelected: {
+    color: '#3b82f6',
+  },
+  optionText: {
+    flex: 1,
+    fontSize: 15,
+    color: '#374151',
+    lineHeight: 22,
+    fontWeight: '500',
+  },
+  optionTextSelected: {
+    color: '#1e40af',
+    fontWeight: '600',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  footerGradient: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 50,
+  },
+  footerContent: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  navButton: {
+    flex: 1,
+    borderRadius: 12,
+    minHeight: 50,
+    justifyContent: 'center',
+  },
+  navButtonSecondary: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#3b82f6',
+  },
+  navButtonWarning: {
+    overflow: 'hidden',
+  },
+  navButtonPrimary: {
+    overflow: 'hidden',
+  },
+  navButtonGradient: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  navButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  navButtonDisabled: {
+    opacity: 0.4,
+  },
+  navButtonText: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  navButtonTextSecondary: {
+    color: '#3b82f6',
+  },
+  navButtonTextLight: {
+    color: '#fff',
+  },
+  navButtonTextDisabled: {
+    color: '#9ca3af',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContentCard: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 20,
+    overflow: 'hidden',
+    elevation: 10,
+  },
+  modalGradient: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#fff',
+    marginTop: 20,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 15,
+    color: '#fff',
+    opacity: 0.95,
+    marginBottom: 20,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  modalInfo: {
+    fontSize: 14,
+    color: '#fff',
+    marginBottom: 6,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  dashboardButton: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginTop: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    width: '100%',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  dashboardButtonInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  dashboardButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#10b981',
+  },
+
+});
+
+export default styles;
