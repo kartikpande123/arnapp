@@ -14,6 +14,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import NetworkChecker from './NetworkChecker'; // Import NetworkChecker
 
 const { width } = Dimensions.get('window');
 import API_BASE_URL from './ApiConfig';
@@ -232,310 +233,312 @@ const Dashboard = ({ navigation }) => {
   const shouldShowBadge = !temporarilyHidden && unreadCount > 0;
 
   return (
-    <View style={styles.container}>
-      {/* Enhanced Header with Gradient */}
-      <View style={styles.headerGradient}>
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <View style={styles.logoContainer}>
-              <Image
-                source={require('../Images/LOGO.jpg')}
-                style={styles.logo}
-                resizeMode="contain"
+    <NetworkChecker>
+      <View style={styles.container}>
+        {/* Enhanced Header with Gradient */}
+        <View style={styles.headerGradient}>
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <View style={styles.logoContainer}>
+                <Image
+                  source={require('../Images/LOGO.jpg')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.headerTextContainer}>
+                <Text style={styles.headerTitle}>ARN Pvt Exam Conduct</Text>
+                <Text style={styles.headerSubtitle}>Excellence in Education</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              colors={['#1a3b5d']}
+              tintColor="#1a3b5d"
+            />
+          }
+        >
+          {/* Enhanced Dashboard Header */}
+          <View style={styles.dashboardHeader}>
+            <Text style={styles.dashboardTitle}>Exam Dashboard</Text>
+            <Text style={styles.dashboardSubtitle}>Your learning journey starts here</Text>
+            
+            <TouchableOpacity
+              style={styles.tutorialLink}
+              onPress={() => navigation.navigate('TutorialDashboard')}
+              activeOpacity={0.8}
+            >
+              <View style={styles.tutorialContent}>
+                <Icon name="play-circle" size={22} color="#fff" />
+                <View style={styles.tutorialTextContainer}>
+                  <Text style={styles.tutorialTextBold}>New to the app?</Text>
+                  <Text style={styles.tutorialText}>Watch our quick tutorial</Text>
+                </View>
+              </View>
+              <Icon name="chevron-right" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Enhanced Navigation Cards with better spacing */}
+          <View style={styles.navCardsContainer}>
+            <NavCard
+              iconName="medal"
+              text="Rewards"
+              color="#4e73df"
+              onPress={() => navigation.navigate('Rewards')}
+            />
+            <NavCard
+              iconName="calendar"
+              text="Upcoming Exams"
+              color="#1cc88a"
+              onPress={() => navigation.navigate('UpcomingExams')}
+            />
+            <NavCard
+              iconName="bell"
+              text="Notifications"
+              color="#f6a623"
+              badge={shouldShowBadge ? displayCount : null}
+              onPress={handleNotificationClick}
+            />
+            <NavCard
+              iconName="book-open-variant"
+              text="Exam Q/A"
+              color="#e74a3b"
+              onPress={() => navigation.navigate('ExamKeyAnswer')}
+            />
+            <NavCard
+              iconName="information"
+              text="About Us"
+              color="#36b9cc"
+              onPress={() => navigation.navigate('AboutUs')}
+            />
+            <NavCard
+              iconName="help-circle"
+              text="Help & Support"
+              color="#858796"
+              onPress={() => navigation.navigate('Help')}
+            />
+          </View>
+
+          {/* Main Content */}
+          <View style={styles.mainContent}>
+            {/* Enhanced Today's Exam Card */}
+            {exam ? (
+              <View style={styles.examCardWrapper}>
+                <View style={styles.examCard}>
+                  <View style={[styles.examHeader, isExamExpired && styles.examHeaderExpired]}>
+                    <View style={styles.examHeaderLeft}>
+                      <Icon name="clock-check-outline" size={24} color="#fff" style={styles.examHeaderIcon} />
+                      <View>
+                        <Text style={styles.examHeaderLabel}>Today's Exam</Text>
+                        <Text style={styles.examHeaderTitle}>
+                          {exam.examDetails?.name || "Today's Exam"}
+                        </Text>
+                      </View>
+                    </View>
+                    {isExamExpired && (
+                      <View style={styles.statusBadge}>
+                        <Text style={styles.statusBadgeText}>ENDED</Text>
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.examBody}>
+                    <View style={styles.examInfoGrid}>
+                      <View style={styles.examInfoCard}>
+                        <Icon name="calendar" size={24} color="#4e73df" />
+                        <View style={styles.examInfoText}>
+                          <Text style={styles.examInfoLabel}>Date</Text>
+                          <Text style={styles.examInfoValue}>{exam.date}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.examInfoCard}>
+                        <Icon name="clock-outline" size={24} color="#1cc88a" />
+                        <View style={styles.examInfoText}>
+                          <Text style={styles.examInfoLabel}>Time</Text>
+                          <Text style={styles.examInfoValue}>{exam.startTime} - {exam.endTime}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.examInfoCard}>
+                        <Icon name="star" size={24} color="#f6a623" />
+                        <View style={styles.examInfoText}>
+                          <Text style={styles.examInfoLabel}>Total Marks</Text>
+                          <Text style={styles.examInfoValue}>{exam.marks}</Text>
+                        </View>
+                      </View>
+                    </View>
+                    
+                    <TouchableOpacity
+                      style={[styles.startExamBtn, isExamExpired && styles.startExamBtnDisabled]}
+                      onPress={goToExamEntry}
+                      disabled={isExamExpired}
+                      activeOpacity={0.8}
+                    >
+                      <Icon name={isExamExpired ? "close-circle" : "play-circle"} size={20} color="#fff" style={styles.startExamIcon} />
+                      <Text style={styles.startExamBtnText}>
+                        {isExamExpired ? 'Exam is Over Today' : 'Start Exam Now'}
+                      </Text>
+                      {!isExamExpired && <Icon name="arrow-right" size={20} color="#fff" />}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.noExamCard}>
+                <View style={styles.noExamIconContainer}>
+                  <Icon name="calendar-remove" size={56} color="#1a3b5d" />
+                </View>
+                <Text style={styles.noExamTitle}>No Exams Today</Text>
+                <Text style={styles.noExamText}>Check your upcoming exams schedule</Text>
+                <TouchableOpacity 
+                  style={styles.noExamBtn}
+                  onPress={() => navigation.navigate('UpcomingExams')}
+                >
+                  <Text style={styles.noExamBtnText}>View Schedule</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Enhanced Resource Cards */}
+            <ResourceCard
+              iconName="text-box-check"
+              title="Practice Tests"
+              description="Access premium practice tests to prepare for your exams with real exam-like questions and detailed solutions."
+              buttonText="Explore Tests"
+              buttonColor="#5a67d8"
+              iconColor="#5a67d8"
+              onPress={() => navigation.navigate('PracticeTestDashboard')}
+            />
+
+            <ResourceCard
+              iconName="bookmark-multiple"
+              title="Study Materials"
+              description="Comprehensive study guides, notes, and reference materials curated by experts to help you ace your exams."
+              buttonText="Explore Materials"
+              buttonColor="#1cc88a"
+              iconColor="#1cc88a"
+              onPress={() => navigation.navigate('PdfSyllabusDashboard')}
+            />
+
+            <ResourceCard
+              iconName="play-circle"
+              title="Video Syllabus"
+              description="Watch comprehensive video lectures and tutorials from expert instructors covering the complete syllabus."
+              buttonText="Watch Videos"
+              buttonColor="#f6a623"
+              iconColor="#f6a623"
+              onPress={() => navigation.navigate('VideoSyllabusDashboard')}
+            />
+
+            {/* Enhanced Premium Card */}
+            <View style={styles.premiumCardWrapper}>
+              <View style={styles.premiumCard}>
+                <View style={styles.premiumBadge}>
+                  <Icon name="crown" size={16} color="#fff" />
+                  <Text style={styles.premiumBadgeText}>PREMIUM</Text>
+                </View>
+                
+                <View style={styles.premiumHeader}>
+                  <Icon name="crown" size={32} color="#d4af37" />
+                  <Text style={styles.premiumTitle}>Super User Premium</Text>
+                </View>
+                
+                <Text style={styles.premiumSubtitle}>Unlock all features and maximize your learning potential</Text>
+                
+                <View style={styles.premiumFeaturesList}>
+                  <PremiumFeature icon="check-circle" text="Unlimited practice tests access" />
+                  <PremiumFeature icon="check-circle" text="All video materials included" />
+                  <PremiumFeature icon="check-circle" text="Priority support & assistance" />
+                  <PremiumFeature icon="check-circle" text="Ad-free learning experience" />
+                </View>
+                
+                <TouchableOpacity
+                  style={styles.premiumBtn}
+                  onPress={() => navigation.navigate('SuperUserDashboard')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.premiumBtnText}>Upgrade to Premium</Text>
+                  <Icon name="arrow-right" size={18} color="#2d3748" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* Enhanced Action Buttons */}
+          <View style={styles.actionButtonsSection}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <View style={styles.actionButtons}>
+              <ActionButton 
+                text="Results" 
+                iconName="chart-line"
+                color="#4e73df"
+                onPress={() => navigation.navigate('ExamResults')} 
+              />
+              <ActionButton 
+                text="Syllabus" 
+                iconName="download"
+                color="#1cc88a"
+                onPress={() => navigation.navigate('UserSyllabus')} 
+              />
+              <ActionButton 
+                text="Hall Ticket" 
+                iconName="ticket"
+                color="#f6a623"
+                onPress={() => navigation.navigate('DownloadHallTicket')} 
+              />
+              <ActionButton 
+                text="Exam Form" 
+                iconName="file-document"
+                color="#e74a3b"
+                onPress={() => navigation.navigate('ExamForm')} 
+              />
+              <ActionButton 
+                text="Key Answers" 
+                iconName="key"
+                color="#36b9cc"
+                onPress={() => navigation.navigate('CheckAnswers')} 
+              />
+              <ActionButton 
+                text="Winners" 
+                iconName="trophy"
+                color="#d4af37"
+                onPress={() => navigation.navigate('FindWinner')} 
               />
             </View>
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>ARN Pvt Exam Conduct</Text>
-              <Text style={styles.headerSubtitle}>Excellence in Education</Text>
+          </View>
+
+          {/* Enhanced Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              © 2025/2026 Karnataka Ayan Wholesale Supply Enterprises
+            </Text>
+            <Text style={styles.footerSubtext}>All Rights Reserved</Text>
+            <View style={styles.footerLinks}>
+              <TouchableOpacity onPress={() => navigation.navigate('TermsAndConditions')}>
+                <Text style={styles.footerLink}>Terms & Conditions</Text>
+              </TouchableOpacity>
+              <Text style={styles.footerSeparator}>•</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
+                <Text style={styles.footerLink}>Privacy Policy</Text>
+              </TouchableOpacity>
+              <Text style={styles.footerSeparator}>•</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('CancellationPolicy')}>
+                <Text style={styles.footerLink}>Cancellation Policy</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </ScrollView>
+
+        <Toast />
       </View>
-
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
-            colors={['#1a3b5d']}
-            tintColor="#1a3b5d"
-          />
-        }
-      >
-        {/* Enhanced Dashboard Header */}
-        <View style={styles.dashboardHeader}>
-          <Text style={styles.dashboardTitle}>Exam Dashboard</Text>
-          <Text style={styles.dashboardSubtitle}>Your learning journey starts here</Text>
-          
-          <TouchableOpacity
-            style={styles.tutorialLink}
-            onPress={() => navigation.navigate('TutorialDashboard')}
-            activeOpacity={0.8}
-          >
-            <View style={styles.tutorialContent}>
-              <Icon name="play-circle" size={22} color="#fff" />
-              <View style={styles.tutorialTextContainer}>
-                <Text style={styles.tutorialTextBold}>New to the app?</Text>
-                <Text style={styles.tutorialText}>Watch our quick tutorial</Text>
-              </View>
-            </View>
-            <Icon name="chevron-right" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Enhanced Navigation Cards with better spacing */}
-        <View style={styles.navCardsContainer}>
-          <NavCard
-            iconName="medal"
-            text="Rewards"
-            color="#4e73df"
-            onPress={() => navigation.navigate('Rewards')}
-          />
-          <NavCard
-            iconName="calendar"
-            text="Upcoming Exams"
-            color="#1cc88a"
-            onPress={() => navigation.navigate('UpcomingExams')}
-          />
-          <NavCard
-            iconName="bell"
-            text="Notifications"
-            color="#f6a623"
-            badge={shouldShowBadge ? displayCount : null}
-            onPress={handleNotificationClick}
-          />
-          <NavCard
-            iconName="book-open-variant"
-            text="Exam Q/A"
-            color="#e74a3b"
-            onPress={() => navigation.navigate('ExamKeyAnswer')}
-          />
-          <NavCard
-            iconName="information"
-            text="About Us"
-            color="#36b9cc"
-            onPress={() => navigation.navigate('AboutUs')}
-          />
-          <NavCard
-            iconName="help-circle"
-            text="Help & Support"
-            color="#858796"
-            onPress={() => navigation.navigate('Help')}
-          />
-        </View>
-
-        {/* Main Content */}
-        <View style={styles.mainContent}>
-          {/* Enhanced Today's Exam Card */}
-          {exam ? (
-            <View style={styles.examCardWrapper}>
-              <View style={styles.examCard}>
-                <View style={[styles.examHeader, isExamExpired && styles.examHeaderExpired]}>
-                  <View style={styles.examHeaderLeft}>
-                    <Icon name="clock-check-outline" size={24} color="#fff" style={styles.examHeaderIcon} />
-                    <View>
-                      <Text style={styles.examHeaderLabel}>Today's Exam</Text>
-                      <Text style={styles.examHeaderTitle}>
-                        {exam.examDetails?.name || "Today's Exam"}
-                      </Text>
-                    </View>
-                  </View>
-                  {isExamExpired && (
-                    <View style={styles.statusBadge}>
-                      <Text style={styles.statusBadgeText}>ENDED</Text>
-                    </View>
-                  )}
-                </View>
-                <View style={styles.examBody}>
-                  <View style={styles.examInfoGrid}>
-                    <View style={styles.examInfoCard}>
-                      <Icon name="calendar" size={24} color="#4e73df" />
-                      <View style={styles.examInfoText}>
-                        <Text style={styles.examInfoLabel}>Date</Text>
-                        <Text style={styles.examInfoValue}>{exam.date}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.examInfoCard}>
-                      <Icon name="clock-outline" size={24} color="#1cc88a" />
-                      <View style={styles.examInfoText}>
-                        <Text style={styles.examInfoLabel}>Time</Text>
-                        <Text style={styles.examInfoValue}>{exam.startTime} - {exam.endTime}</Text>
-                      </View>
-                    </View>
-                    <View style={styles.examInfoCard}>
-                      <Icon name="star" size={24} color="#f6a623" />
-                      <View style={styles.examInfoText}>
-                        <Text style={styles.examInfoLabel}>Total Marks</Text>
-                        <Text style={styles.examInfoValue}>{exam.marks}</Text>
-                      </View>
-                    </View>
-                  </View>
-                  
-                  <TouchableOpacity
-                    style={[styles.startExamBtn, isExamExpired && styles.startExamBtnDisabled]}
-                    onPress={goToExamEntry}
-                    disabled={isExamExpired}
-                    activeOpacity={0.8}
-                  >
-                    <Icon name={isExamExpired ? "close-circle" : "play-circle"} size={20} color="#fff" style={styles.startExamIcon} />
-                    <Text style={styles.startExamBtnText}>
-                      {isExamExpired ? 'Exam is Over Today' : 'Start Exam Now'}
-                    </Text>
-                    {!isExamExpired && <Icon name="arrow-right" size={20} color="#fff" />}
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.noExamCard}>
-              <View style={styles.noExamIconContainer}>
-                <Icon name="calendar-remove" size={56} color="#1a3b5d" />
-              </View>
-              <Text style={styles.noExamTitle}>No Exams Today</Text>
-              <Text style={styles.noExamText}>Check your upcoming exams schedule</Text>
-              <TouchableOpacity 
-                style={styles.noExamBtn}
-                onPress={() => navigation.navigate('UpcomingExams')}
-              >
-                <Text style={styles.noExamBtnText}>View Schedule</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Enhanced Resource Cards */}
-          <ResourceCard
-            iconName="text-box-check"
-            title="Practice Tests"
-            description="Access premium practice tests to prepare for your exams with real exam-like questions and detailed solutions."
-            buttonText="Explore Tests"
-            buttonColor="#5a67d8"
-            iconColor="#5a67d8"
-            onPress={() => navigation.navigate('PracticeTestDashboard')}
-          />
-
-          <ResourceCard
-            iconName="bookmark-multiple"
-            title="Study Materials"
-            description="Comprehensive study guides, notes, and reference materials curated by experts to help you ace your exams."
-            buttonText="Explore Materials"
-            buttonColor="#1cc88a"
-            iconColor="#1cc88a"
-            onPress={() => navigation.navigate('PdfSyllabusDashboard')}
-          />
-
-          <ResourceCard
-            iconName="play-circle"
-            title="Video Syllabus"
-            description="Watch comprehensive video lectures and tutorials from expert instructors covering the complete syllabus."
-            buttonText="Watch Videos"
-            buttonColor="#f6a623"
-            iconColor="#f6a623"
-            onPress={() => navigation.navigate('VideoSyllabusDashboard')}
-          />
-
-          {/* Enhanced Premium Card */}
-          <View style={styles.premiumCardWrapper}>
-            <View style={styles.premiumCard}>
-              <View style={styles.premiumBadge}>
-                <Icon name="crown" size={16} color="#fff" />
-                <Text style={styles.premiumBadgeText}>PREMIUM</Text>
-              </View>
-              
-              <View style={styles.premiumHeader}>
-                <Icon name="crown" size={32} color="#d4af37" />
-                <Text style={styles.premiumTitle}>Super User Premium</Text>
-              </View>
-              
-              <Text style={styles.premiumSubtitle}>Unlock all features and maximize your learning potential</Text>
-              
-              <View style={styles.premiumFeaturesList}>
-                <PremiumFeature icon="check-circle" text="Unlimited practice tests access" />
-                <PremiumFeature icon="check-circle" text="All video materials included" />
-                <PremiumFeature icon="check-circle" text="Priority support & assistance" />
-                <PremiumFeature icon="check-circle" text="Ad-free learning experience" />
-              </View>
-              
-              <TouchableOpacity
-                style={styles.premiumBtn}
-                onPress={() => navigation.navigate('SuperUserDashboard')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.premiumBtnText}>Upgrade to Premium</Text>
-                <Icon name="arrow-right" size={18} color="#2d3748" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Enhanced Action Buttons */}
-        <View style={styles.actionButtonsSection}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.actionButtons}>
-            <ActionButton 
-              text="Results" 
-              iconName="chart-line"
-              color="#4e73df"
-              onPress={() => navigation.navigate('ExamResults')} 
-            />
-            <ActionButton 
-              text="Syllabus" 
-              iconName="download"
-              color="#1cc88a"
-              onPress={() => navigation.navigate('UserSyllabus')} 
-            />
-            <ActionButton 
-              text="Hall Ticket" 
-              iconName="ticket"
-              color="#f6a623"
-              onPress={() => navigation.navigate('DownloadHallTicket')} 
-            />
-            <ActionButton 
-              text="Exam Form" 
-              iconName="file-document"
-              color="#e74a3b"
-              onPress={() => navigation.navigate('ExamForm')} 
-            />
-            <ActionButton 
-              text="Key Answers" 
-              iconName="key"
-              color="#36b9cc"
-              onPress={() => navigation.navigate('CheckAnswers')} 
-            />
-            <ActionButton 
-              text="Winners" 
-              iconName="trophy"
-              color="#d4af37"
-              onPress={() => navigation.navigate('FindWinner')} 
-            />
-          </View>
-        </View>
-
-        {/* Enhanced Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>
-            © 2025/2026 Karnataka Ayan Wholesale Supply Enterprises
-          </Text>
-          <Text style={styles.footerSubtext}>All Rights Reserved</Text>
-          <View style={styles.footerLinks}>
-            <TouchableOpacity onPress={() => navigation.navigate('TermsAndConditions')}>
-              <Text style={styles.footerLink}>Terms & Conditions</Text>
-            </TouchableOpacity>
-            <Text style={styles.footerSeparator}>•</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('PrivacyPolicy')}>
-              <Text style={styles.footerLink}>Privacy Policy</Text>
-            </TouchableOpacity>
-            <Text style={styles.footerSeparator}>•</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('CancellationPolicy')}>
-              <Text style={styles.footerLink}>Cancellation Policy</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-
-      <Toast />
-    </View>
+    </NetworkChecker>
   );
 };
 
