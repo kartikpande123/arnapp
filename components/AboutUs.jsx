@@ -173,7 +173,7 @@ const AboutUs = ({ navigation }) => {
 
           <View style={styles.footerLinks}>
             <TouchableOpacity
-              onPress={() => navigation.navigate('TermsCondition')}>
+              onPress={() => navigation.navigate('TermsAndConditions')}>
               <Text style={styles.footerLink}>Terms and Conditions</Text>
             </TouchableOpacity>
             <Text style={styles.footerSeparator}>|</Text>

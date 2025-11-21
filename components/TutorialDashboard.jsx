@@ -416,6 +416,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#1e293b",
+    paddingTop:40
   },
   closeButton: {
     padding: 8,

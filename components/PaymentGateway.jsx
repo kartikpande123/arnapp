@@ -84,14 +84,9 @@ const PaymentGateway = ({ route, navigation }) => {
 
   // Helper function to get logo base64 or URI
   const getBase64Logo = () => {
-    try {
-      const logoSource = Image.resolveAssetSource(require('../Images/LOGO.jpg'));
-      return logoSource ? logoSource.uri : '';
-    } catch (error) {
-      console.error('Error loading logo:', error);
-      return '';
-    }
-  };
+  // This is your correct Firebase Storage public URL
+  return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
+};
 
   // Policy Content
   const cancellationPolicy = `Cancellation Policy for ARN Private Exam Conduct

@@ -102,17 +102,10 @@ const PdfSyllabusPurchase = ({ route, navigation }) => {
   }, [selectedSyllabus, navigation]);
 
   // Helper function to get logo base64 or URI
-  const getBase64Logo = () => {
-    try {
-      const logoSource = Image.resolveAssetSource(
-        require('../Images/LOGO.jpg'),
-      );
-      return logoSource ? logoSource.uri : '';
-    } catch (error) {
-      console.error('Error loading logo:', error);
-      return '';
-    }
-  };
+ const getBase64Logo = () => {
+  // This is your correct Firebase Storage public URL
+  return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
+};
 
   // Format date for display
   const formatDate = date => {
@@ -1163,7 +1156,7 @@ const PdfSyllabusPurchase = ({ route, navigation }) => {
 
   // Handle back to home
   const handleBackToHome = () => {
-    navigation.navigate('PdfSyllabusDashboard');
+    navigation.navigate('Dashboard');
   };
 
   // Render content based on stage
