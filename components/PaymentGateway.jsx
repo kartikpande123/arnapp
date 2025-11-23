@@ -1126,7 +1126,7 @@ const generateHallTicketHTML = (candidate) => {
 
           <div class="footer-text">
             Thank you for your payment. This is a computer-generated invoice.<br/>
-            For any queries, please contact +91 6360785195 or +91 9482759409<br/>
+            For any queries, please contact +91 6360785195<br/>
             You can reach us through the Help section as well.
           </div>
         </body>
@@ -1297,7 +1297,7 @@ const generateHallTicketHTML = (candidate) => {
           <View style={styles.helpContent}>
             <Text style={styles.helpTitle}>Need Help?</Text>
             <Text style={styles.helpText}>
-              • Contact: +91 6360785195, +91 9482759409{'\n'}
+              • Contact: +91 6360785195{'\n'}
               • Keep payment screenshot ready{'\n'}
               • Visit help section for support
             </Text>

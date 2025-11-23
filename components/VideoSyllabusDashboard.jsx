@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -21,167 +21,67 @@ import LinearGradient from 'react-native-linear-gradient';
 const { width } = Dimensions.get('window');
 import API_BASE_URL from './ApiConfig';
 
-const VideoSyllabusDashboard = ({ navigation }) => {
-  const [syllabi, setSyllabi] = useState({});
-  const [filteredSyllabi, setFilteredSyllabi] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+// Memoized Thumbnail Component with Lazy Loading
+const LazyVideoThumbnail = memo(({ imageUrl, category }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [showImage, setShowImage] = useState(false);
 
   useEffect(() => {
-    fetchSyllabi();
+    // Delay image loading slightly to prioritize initial render
+    const timer = setTimeout(() => {
+      setShowImage(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const fetchSyllabi = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await fetch(`${API_BASE_URL}/api/video-syllabi`);
+  if (!showImage || !imageUrl || imageError) {
+    return (
+      <View style={styles.noThumbnail}>
+        <Icon name="play-circle-filled" size={50} color="#fff" />
+        <Text style={styles.noThumbnailText}>No Thumbnail</Text>
+      </View>
+    );
+  }
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch video syllabi');
-      }
+  return (
+    <View style={styles.thumbnailWrapper}>
+      {!imageLoaded && (
+        <View style={styles.thumbnailLoader}>
+          <ActivityIndicator size="small" color="#fff" />
+        </View>
+      )}
+      <Image
+        source={{ uri: imageUrl }}
+        style={[styles.thumbnailImage, !imageLoaded && styles.hiddenImage]}
+        resizeMode="contain"
+        onLoad={() => setImageLoaded(true)}
+        onError={() => {
+          setImageError(true);
+          setImageLoaded(true);
+        }}
+        // Performance optimizations
+        progressiveRenderingEnabled={true}
+        fadeDuration={200}
+      />
+    </View>
+  );
+});
 
-      const data = await response.json();
-      setSyllabi(data);
-
-      const allSyllabi = Object.entries(data).flatMap(([category, items]) =>
-        Object.entries(items).map(([title, item]) => ({
-          ...item,
-          category,
-          title
-        }))
-      ).sort((a, b) => b.createdAt - a.createdAt);
-
-      setFilteredSyllabi(allSyllabi);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Error fetching video syllabi:', err);
-      setError(err.message);
-      setIsLoading(false);
-    }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchSyllabi();
-    setRefreshing(false);
-  };
-
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-    setShowCategoryModal(false);
-
-    const filtered = Object.entries(syllabi)
-      .flatMap(([cat, items]) =>
-        Object.entries(items).map(([title, item]) => ({
-          ...item,
-          category: cat,
-          title
-        }))
-      )
-      .filter(item =>
-        (category === 'All Categories' || item.category === category) &&
-        item.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => b.createdAt - a.createdAt);
-
-    setFilteredSyllabi(filtered);
-  };
-
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-
-    const filtered = Object.entries(syllabi)
-      .flatMap(([cat, items]) =>
-        Object.entries(items).map(([title, item]) => ({
-          ...item,
-          category: cat,
-          title
-        }))
-      )
-      .filter(item =>
-        (selectedCategory === 'All Categories' || item.category === selectedCategory) &&
-        item.title.toLowerCase().includes(term.toLowerCase())
-      )
-      .sort((a, b) => b.createdAt - a.createdAt);
-
-    setFilteredSyllabi(filtered);
-  };
-
-  const handlePurchaseVideo = (syllabus) => {
-    if (!syllabus.fees && syllabus.fees !== 0) {
-      console.error('Fees information is missing from the syllabus:', syllabus);
-      Alert.alert('Error', 'Fees information is missing for this video material.');
-      return;
-    }
-    
-    const videoDetails = {
-      id: syllabus.id || syllabus.title,
-      title: syllabus.title,
-      category: syllabus.category,
-      fees: syllabus.fees || 0,
-      duration: syllabus.duration || 'N/A',
-      description: syllabus.description || 'Comprehensive video syllabus for exam preparation.',
-      imageUrl: syllabus.imageUrl || null,
-      filePath: syllabus.filePath || '',
-      fileUrl: syllabus.fileUrl || '',
-      createdAt: syllabus.createdAt,
-      updatedAt: syllabus.updatedAt,
-    };
-
-    console.log('Navigating to VideoSyllabusPurchase with:', videoDetails);
-
-    if (navigation && typeof navigation.navigate === 'function') {
-      try {
-        navigation.navigate('VideoSyllabusPurchase', { 
-          selectedSyllabus: videoDetails
-        });
-      } catch (navError) {
-        console.error('Navigation error:', navError);
-        Alert.alert(
-          'Navigation Error',
-          'Unable to navigate to purchase screen. Please check your navigation configuration.',
-          [{ text: 'OK' }]
-        );
-      }
-    } else {
-      console.error('Navigation object is not properly configured');
-      Alert.alert(
-        'Error',
-        'Navigation is not properly configured. Please contact support.',
-        [{ text: 'OK' }]
-      );
-    }
-  };
-
-  const categories = ['All Categories', ...new Set(Object.keys(syllabi))];
-
-  const renderSyllabusCard = ({ item, index }) => (
+// Memoized Card Component
+const VideoSyllabusCard = memo(({ item, index, onPress }) => {
+  return (
     <TouchableOpacity 
       activeOpacity={0.95}
-      onPress={() => handlePurchaseVideo(item)}
+      onPress={() => onPress(item)}
     >
       <View style={styles.card}>
         {/* Card with Horizontal Layout */}
         <View style={styles.cardHorizontal}>
           {/* Thumbnail Image Section */}
           <View style={styles.thumbnailContainer}>
-            {item.imageUrl ? (
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={styles.thumbnailImage}
-                resizeMode="contain"
-              />
-            ) : (
-              <View style={styles.noThumbnail}>
-                <Icon name="play-circle-filled" size={50} color="#fff" />
-                <Text style={styles.noThumbnailText}>No Thumbnail</Text>
-              </View>
-            )}
+            <LazyVideoThumbnail imageUrl={item.imageUrl} category={item.category} />
             
             {/* Category Badge Overlay */}
             <View style={styles.categoryBadgeOverlay}>
@@ -262,7 +162,7 @@ const VideoSyllabusDashboard = ({ navigation }) => {
         {/* Action Button - Full Width */}
         <TouchableOpacity
           style={styles.purchaseButton}
-          onPress={() => handlePurchaseVideo(item)}
+          onPress={() => onPress(item)}
           activeOpacity={0.8}
         >
           <LinearGradient
@@ -280,6 +180,165 @@ const VideoSyllabusDashboard = ({ navigation }) => {
       </View>
     </TouchableOpacity>
   );
+}, (prevProps, nextProps) => {
+  // Custom comparison to prevent unnecessary re-renders
+  return prevProps.item.title === nextProps.item.title &&
+         prevProps.item.createdAt === nextProps.item.createdAt &&
+         prevProps.item.updatedAt === nextProps.item.updatedAt;
+});
+
+const VideoSyllabusDashboard = ({ navigation }) => {
+  const [syllabi, setSyllabi] = useState({});
+  const [filteredSyllabi, setFilteredSyllabi] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchSyllabi();
+  }, []);
+
+  const fetchSyllabi = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch(`${API_BASE_URL}/api/video-syllabi`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch video syllabi');
+      }
+
+      const data = await response.json();
+      setSyllabi(data);
+
+      const allSyllabi = Object.entries(data).flatMap(([category, items]) =>
+        Object.entries(items).map(([title, item]) => ({
+          ...item,
+          category,
+          title
+        }))
+      ).sort((a, b) => b.createdAt - a.createdAt);
+
+      setFilteredSyllabi(allSyllabi);
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Error fetching video syllabi:', err);
+      setError(err.message);
+      setIsLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchSyllabi();
+    setRefreshing(false);
+  };
+
+  const handleCategoryChange = useCallback((category) => {
+    setSelectedCategory(category);
+    setShowCategoryModal(false);
+
+    const filtered = Object.entries(syllabi)
+      .flatMap(([cat, items]) =>
+        Object.entries(items).map(([title, item]) => ({
+          ...item,
+          category: cat,
+          title
+        }))
+      )
+      .filter(item =>
+        (category === 'All Categories' || item.category === category) &&
+        item.title.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    setFilteredSyllabi(filtered);
+  }, [syllabi, searchTerm]);
+
+  const handleSearch = useCallback((term) => {
+    setSearchTerm(term);
+
+    const filtered = Object.entries(syllabi)
+      .flatMap(([cat, items]) =>
+        Object.entries(items).map(([title, item]) => ({
+          ...item,
+          category: cat,
+          title
+        }))
+      )
+      .filter(item =>
+        (selectedCategory === 'All Categories' || item.category === selectedCategory) &&
+        item.title.toLowerCase().includes(term.toLowerCase())
+      )
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    setFilteredSyllabi(filtered);
+  }, [syllabi, selectedCategory]);
+
+  const handlePurchaseVideo = useCallback((syllabus) => {
+    if (!syllabus.fees && syllabus.fees !== 0) {
+      console.error('Fees information is missing from the syllabus:', syllabus);
+      Alert.alert('Error', 'Fees information is missing for this video material.');
+      return;
+    }
+    
+    const videoDetails = {
+      id: syllabus.id || syllabus.title,
+      title: syllabus.title,
+      category: syllabus.category,
+      fees: syllabus.fees || 0,
+      duration: syllabus.duration || 'N/A',
+      description: syllabus.description || 'Comprehensive video syllabus for exam preparation.',
+      imageUrl: syllabus.imageUrl || null,
+      filePath: syllabus.filePath || '',
+      fileUrl: syllabus.fileUrl || '',
+      createdAt: syllabus.createdAt,
+      updatedAt: syllabus.updatedAt,
+    };
+
+    if (navigation && typeof navigation.navigate === 'function') {
+      try {
+        navigation.navigate('VideoSyllabusPurchase', { 
+          selectedSyllabus: videoDetails
+        });
+      } catch (navError) {
+        console.error('Navigation error:', navError);
+        Alert.alert(
+          'Navigation Error',
+          'Unable to navigate to purchase screen. Please check your navigation configuration.',
+          [{ text: 'OK' }]
+        );
+      }
+    } else {
+      console.error('Navigation object is not properly configured');
+      Alert.alert(
+        'Error',
+        'Navigation is not properly configured. Please contact support.',
+        [{ text: 'OK' }]
+      );
+    }
+  }, [navigation]);
+
+  const categories = ['All Categories', ...new Set(Object.keys(syllabi))];
+
+  const renderSyllabusCard = useCallback(({ item, index }) => (
+    <VideoSyllabusCard 
+      item={item} 
+      index={index} 
+      onPress={handlePurchaseVideo}
+    />
+  ), [handlePurchaseVideo]);
+
+  const keyExtractor = useCallback((item, index) => `${item.title}-${index}`, []);
+
+  const getItemLayout = useCallback((data, index) => ({
+    length: 196, // Approximate height of card
+    offset: 196 * index,
+    index,
+  }), []);
 
   if (isLoading) {
     return (
@@ -412,7 +471,7 @@ const VideoSyllabusDashboard = ({ navigation }) => {
         <FlatList
           data={filteredSyllabi}
           renderItem={renderSyllabusCard}
-          keyExtractor={(item, index) => `${item.title}-${index}`}
+          keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -423,6 +482,13 @@ const VideoSyllabusDashboard = ({ navigation }) => {
               tintColor="#1a3b5d"
             />
           }
+          // Performance optimizations
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={8}
+          windowSize={10}
+          getItemLayout={getItemLayout}
         />
       )}
 
@@ -663,9 +729,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a3b5d',
     position: 'relative',
   },
+  thumbnailWrapper: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
   thumbnailImage: {
     width: '100%',
     height: '100%',
+  },
+  hiddenImage: {
+    opacity: 0,
+  },
+  thumbnailLoader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1a3b5d',
+    zIndex: 1,
   },
   noThumbnail: {
     width: '100%',
