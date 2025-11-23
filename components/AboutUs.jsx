@@ -147,7 +147,6 @@ const AboutUs = ({ navigation }) => {
             </View>
             <View>
               <Text style={styles.contactText}>+91 6360785195</Text>
-              <Text style={styles.contactText}>+91 9482759409</Text>
             </View>
           </TouchableOpacity>
 
