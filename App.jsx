@@ -33,7 +33,7 @@ import VideoSyllabusDashboard from "./components/VideoSyllabusDashboard";
 import VideoSyllabusEntry from "./components/VideoSyllabusEntry";
 import VideoSyllabusPurchase from "./components/VideoSyllabusPurchase";
 import SuperUserDashboard from "./components/SuperUserDashboard";
-import MainExam from "./components/MainExam"
+import MainExam from "./components/MainExam";
 
 const Stack = createNativeStackNavigator();
 
