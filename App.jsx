@@ -34,6 +34,10 @@ import VideoSyllabusEntry from "./components/VideoSyllabusEntry";
 import VideoSyllabusPurchase from "./components/VideoSyllabusPurchase";
 import SuperUserDashboard from "./components/SuperUserDashboard";
 import MainExam from "./components/MainExam";
+import CourseDashboard from "./components/CourseDashboard";
+import CourseGmeetFinder from "./components/CourseGmeetFinder";
+import CourseStatusCheck from "./components/CourseStatusCheck";
+import CourseDetails from "./components/CourseDetails";
 
 const Stack = createNativeStackNavigator();
 
@@ -75,6 +79,10 @@ export default function App() {
           <Stack.Screen name="VideoSyllabusPurchase" component={VideoSyllabusPurchase} />
           <Stack.Screen name="SuperUserDashboard" component={SuperUserDashboard} />
           <Stack.Screen name="MainExam" component={MainExam} />
+          <Stack.Screen name="CourseDashboard" component={CourseDashboard} />
+          <Stack.Screen name="CourseGmeetFinder" component={CourseGmeetFinder} />
+          <Stack.Screen name="CourseStatusCheck" component={CourseStatusCheck} />
+          <Stack.Screen name="CourseDetails" component={CourseDetails} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

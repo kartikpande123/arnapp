@@ -437,6 +437,33 @@ const Dashboard = ({ navigation }) => {
               onPress={() => navigation.navigate('VideoSyllabusDashboard')}
             />
 
+            {/* NEW: Course Dashboard Card */}
+            <View style={styles.courseCard}>
+              <View style={[styles.courseIconContainer, { backgroundColor: 'rgba(139, 92, 246, 0.1)' }]}>
+                <Icon name="school" size={28} color="#8b5cf6" />
+              </View>
+              <Text style={styles.courseTitle}>Course Dashboard</Text>
+              <Text style={styles.courseDescription}>
+                <Text style={styles.courseFeature}><Icon name="check-circle" size={16} color="#8b5cf6" /> </Text>
+                Specialized certification courses.{'\n'}
+                <Text style={styles.courseFeature}><Icon name="check-circle" size={16} color="#8b5cf6" /> </Text>
+                Expert-led training programs.{'\n'}
+                <Text style={styles.courseFeature}><Icon name="check-circle" size={16} color="#8b5cf6" /> </Text>
+                Hands-on practical learning.{'\n'}
+                <Text style={styles.courseFeature}><Icon name="check-circle" size={16} color="#8b5cf6" /> </Text>
+                Career advancement opportunities.{'\n'}
+                Browse and purchase courses tailored to your goals!
+              </Text>
+              <TouchableOpacity
+                style={[styles.courseBtn, { backgroundColor: '#8b5cf6' }]}
+                onPress={() => navigation.navigate('CourseDashboard')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.courseBtnText}>Browse Courses</Text>
+                <Icon name="arrow-right" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
             {/* Enhanced Premium Card */}
             <View style={styles.premiumCardWrapper}>
               <View style={styles.premiumCard}>
@@ -930,6 +957,66 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     borderWidth: 1,
     borderColor: '#e8ecf1',
+  },
+  // NEW: Course Card Styles
+  courseCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e8ecf1',
+    borderTopWidth: 4,
+    borderTopColor: '#8b5cf6',
+    backgroundColor: 'rgba(139, 92, 246, 0.03)',
+  },
+  courseIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+  },
+  courseTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#2d3748',
+    marginBottom: 10,
+  },
+  courseDescription: {
+    color: '#4a5568',
+    fontSize: 14,
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  courseFeature: {
+    color: '#8b5cf6',
+    fontWeight: 'bold',
+  },
+  courseBtn: {
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+  },
+  courseBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+    marginRight: 8,
   },
   resourceIconContainer: {
     width: 56,
