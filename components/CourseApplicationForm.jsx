@@ -17,7 +17,7 @@ import RNPrint from 'react-native-print';
 import API_BASE_URL from './ApiConfigCourse';
 import styles from "./CourseApplicationFormStyles"
 
-const CourseApplicationForm = ({ course }) => {
+const CourseApplicationForm = ({ course, navigation }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,6 +33,7 @@ const CourseApplicationForm = ({ course }) => {
   const [error, setError] = useState('');
   const [showNotification, setShowNotification] = useState(false);
   const [applicationId, setApplicationId] = useState('');
+  const [showDashboardButton, setShowDashboardButton] = useState(false);
   const scrollViewRef = useRef(null);
 
   // Scroll to top when component mounts
@@ -510,6 +511,10 @@ const CourseApplicationForm = ({ course }) => {
         setTimeout(() => {
           handleDownloadPDF(newApplicationId);
         }, 1000);
+        
+        // Show the dashboard button
+        setShowDashboardButton(true);
+        
       } else {
         setError('Failed to submit application. Please try again.');
         scrollToTop();
@@ -528,6 +533,13 @@ const CourseApplicationForm = ({ course }) => {
       ...formData,
       [name]: value
     });
+  };
+
+  const handleNavigateToDashboard = () => {
+    // Navigate to Dashboard screen
+    if (navigation) {
+      navigation.navigate('Dashboard');
+    }
   };
 
   return (
@@ -749,6 +761,20 @@ const CourseApplicationForm = ({ course }) => {
                 </View>
               )}
             </TouchableOpacity>
+            
+            {/* Continue to Dashboard Button (shown after successful submission) */}
+            {showDashboardButton && (
+              <TouchableOpacity
+                style={[styles.dashboardButton, styles.submitButton]}
+                onPress={handleNavigateToDashboard}
+                activeOpacity={0.8}
+              >
+                <View style={styles.submitButtonContent}>
+                  <Icon name="home" size={20} color="#fff" />
+                  <Text style={styles.submitButtonText}>Continue to Dashboard</Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -784,5 +810,9 @@ const CourseApplicationForm = ({ course }) => {
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
 
+// Add this style to your CourseApplicationFormStyles.js file:
+// dashboardButton: {
+//   marginTop: 10,
+// }
 
 export default CourseApplicationForm;

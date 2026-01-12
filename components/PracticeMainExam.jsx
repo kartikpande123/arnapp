@@ -71,7 +71,8 @@ const PracticeMainExam = ({ navigation, route }) => {
         }
 
         console.log('Fetching questions from API...');
-        const apiUrl = `${API_BASE_URL}/api/practice-tests/${examInfo.examDetails.category}/${examInfo.examDetails.title}/questions`;
+        // Using the same API endpoint as web component
+        const apiUrl = `${API_BASE_URL}/api/practice/${encodeURIComponent(examInfo.examDetails.category)}/${encodeURIComponent(examInfo.examDetails.title)}/questions`;
         console.log('API URL:', apiUrl);
         
         const response = await axios.get(apiUrl);
@@ -461,6 +462,19 @@ const PracticeMainExam = ({ navigation, route }) => {
             </View>
           )}
 
+          {/* Correct Answer Context (shown directly - no dropdown) */}
+          {showAnswerFeedback && currentQuestion.correctAnswerContext && (
+            <View style={styles.contextContainer}>
+              <View style={styles.contextHeader}>
+                <Icon name="lightbulb-on" size={20} color="#1e40af" />
+                <Text style={styles.contextTitle}>Explanation</Text>
+              </View>
+              <Text style={styles.contextText}>
+                {currentQuestion.correctAnswerContext}
+              </Text>
+            </View>
+          )}
+
           {/* Navigation Button */}
           <TouchableOpacity
             style={styles.nextButton}
@@ -841,7 +855,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 15,
     borderWidth: 2,
     minHeight: 60,
   },
@@ -865,6 +879,36 @@ const styles = StyleSheet.create({
   },
   feedbackTextIncorrect: {
     color: '#c0392b',
+  },
+  // Context Container Styles (shown directly - no dropdown)
+  contextContainer: {
+    backgroundColor: '#f0f9ff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#3b82f6',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  contextHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  contextTitle: {
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e40af',
+  },
+  contextText: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
   },
   nextButton: {
     borderRadius: 12,

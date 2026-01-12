@@ -216,7 +216,9 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
-  
+  dashboardButton: {
+  marginTop: 10,
+  }
 });
 
 
