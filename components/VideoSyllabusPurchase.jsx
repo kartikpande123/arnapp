@@ -31,18 +31,22 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   const [stage, setStage] = useState('studentId');
   const [studentId, setStudentId] = useState('');
   const [existingStudentDetails, setExistingStudentDetails] = useState(null);
-  const [selectedSyllabus, setSelectedSyllabus] = useState(initialSelectedSyllabus);
+  const [selectedSyllabus, setSelectedSyllabus] = useState(
+    initialSelectedSyllabus,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isNewStudent, setIsNewStudent] = useState(false);
   const [isEditingExistingData, setIsEditingExistingData] = useState(false);
-  const [showSyllabusDetailsModal, setShowSyllabusDetailsModal] = useState(false);
+  const [showSyllabusDetailsModal, setShowSyllabusDetailsModal] =
+    useState(false);
   const [purchasedStudentDetails, setPurchasedStudentDetails] = useState(null);
   const [isPurchased, setIsPurchased] = useState(false);
   const [accessExpiration, setAccessExpiration] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [paymentId, setPaymentId] = useState(null);
   const [purchaseDate, setPurchaseDate] = useState(null);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -55,28 +59,52 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   });
 
   const indianStates = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-    'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-    'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-    'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
   ];
 
   useEffect(() => {
     if (!selectedSyllabus) {
-      Alert.alert('Error', 'No syllabus selected. Please select a syllabus first.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      Alert.alert(
+        'Error',
+        'No syllabus selected. Please select a syllabus first.',
+        [{ text: 'OK', onPress: () => navigation.goBack() }],
+      );
     }
   }, [selectedSyllabus, navigation]);
 
   const getBase64Logo = () => {
-  // This is your correct Firebase Storage public URL
-  return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
-};
+    // This is your correct Firebase Storage public URL
+    return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
+  };
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     return new Date(date).toLocaleString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -302,20 +330,28 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
               <div class="syllabus-details">
                 <div class="syllabus-detail-item">
                   <div class="syllabus-detail-label">Category</div>
-                  <div class="syllabus-detail-value">${selectedSyllabus.category}</div>
+                  <div class="syllabus-detail-value">${
+                    selectedSyllabus.category
+                  }</div>
                 </div>
                 <div class="syllabus-detail-item">
                   <div class="syllabus-detail-label">Duration</div>
-                  <div class="syllabus-detail-value">${selectedSyllabus.duration}</div>
+                  <div class="syllabus-detail-value">${
+                    selectedSyllabus.duration
+                  }</div>
                 </div>
                 <div class="syllabus-detail-item">
                   <div class="syllabus-detail-label">Purchase Date</div>
-                  <div class="syllabus-detail-value">${formatDate(purchaseDate)}</div>
+                  <div class="syllabus-detail-value">${formatDate(
+                    purchaseDate,
+                  )}</div>
                 </div>
               </div>
               <div style="margin-top: 10px;">
                 <div class="syllabus-detail-label">Access Expires On</div>
-                <div class="syllabus-detail-value expiry-highlight">${formatDate(expiry)}</div>
+                <div class="syllabus-detail-value expiry-highlight">${formatDate(
+                  expiry,
+                )}</div>
               </div>
             </div>
 
@@ -346,13 +382,18 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   // Generate Invoice PDF HTML
   const generateInvoicePDF = () => {
     if (!purchasedStudentDetails || !selectedSyllabus) {
-      Alert.alert('Error', 'Purchase details not found. Cannot generate invoice.');
+      Alert.alert(
+        'Error',
+        'Purchase details not found. Cannot generate invoice.',
+      );
       return;
     }
 
     const logoUri = getBase64Logo();
     const isFree = selectedSyllabus.fees === 0 || selectedSyllabus.fees === '0';
-    const invoicePaymentId = isFree ? `FREE-${Date.now()}` : paymentId || `INV-${Date.now()}`;
+    const invoicePaymentId = isFree
+      ? `FREE-${Date.now()}`
+      : paymentId || `INV-${Date.now()}`;
     const invoiceOrderId = isFree ? `FREE-ORDER-${Date.now()}` : orderId || '';
 
     return `
@@ -518,7 +559,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
           <div class="info-section">
             <div class="info-left">
               <div class="info-label">Invoice Number:</div>
-              <div class="info-value">INV-${invoicePaymentId.substring(0, 8)}</div>
+              <div class="info-value">INV-${invoicePaymentId.substring(
+                0,
+                8,
+              )}</div>
               
               <div class="info-label">Payment ID:</div>
               <div class="info-value">${invoicePaymentId}</div>
@@ -529,19 +573,27 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
             
             <div class="info-right">
               <div class="info-label">Date:</div>
-              <div class="info-value">${new Date().toLocaleDateString('en-IN')}</div>
+              <div class="info-value">${new Date().toLocaleDateString(
+                'en-IN',
+              )}</div>
               
               <div class="info-label">Bill To:</div>
               <div class="info-value">
                 ${purchasedStudentDetails.name || 'N/A'}<br/>
                 ${purchasedStudentDetails.email || 'N/A'}<br/>
                 ${purchasedStudentDetails.phoneNo || 'N/A'}<br/>
-                ${purchasedStudentDetails.district || 'N/A'}, ${purchasedStudentDetails.state || 'N/A'}
+                ${purchasedStudentDetails.district || 'N/A'}, ${
+      purchasedStudentDetails.state || 'N/A'
+    }
               </div>
             </div>
           </div>
 
-          ${!isFree ? '<div class="note-section"><div class="note-text">Note: The amount shown below is inclusive of 18% GST.</div></div>' : ''}
+          ${
+            !isFree
+              ? '<div class="note-section"><div class="note-text">Note: The amount shown below is inclusive of 18% GST.</div></div>'
+              : ''
+          }
 
           <div class="table-header">
             <div>Description</div>
@@ -565,7 +617,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
 
           <div class="total-section">
             <div class="total-label">Total Amount:</div>
-            <div class="total-amount">${isFree ? 'FREE' : `INR ${selectedSyllabus.fees}`}</div>
+            <div class="total-amount">${
+              isFree ? 'FREE' : `INR ${selectedSyllabus.fees}`
+            }</div>
           </div>
 
           <div class="footer-divider"></div>
@@ -605,7 +659,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
     }
   };
 
-  const handlePhoneNumberChange = (value) => {
+  const handlePhoneNumberChange = value => {
     if (formData.age === value) {
       setFormData(prev => ({ ...prev, age: '' }));
     }
@@ -623,7 +677,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
     setError('');
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/video-verify-student/${studentId}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/video-verify-student/${studentId}`,
+      );
 
       if (response.data.exists) {
         setExistingStudentDetails(response.data.studentDetails);
@@ -637,24 +693,39 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
           state: response.data.studentDetails.state || '',
         });
 
-        const purchasesResponse = await axios.get(`${API_BASE_URL}/api/video-student-purchases/${studentId}`);
+        const purchasesResponse = await axios.get(
+          `${API_BASE_URL}/api/video-student-purchases/${studentId}`,
+        );
 
-        if (purchasesResponse.data.success && purchasesResponse.data.purchases) {
-          const hasPurchasedThisSyllabus = purchasesResponse.data.purchases.some(
-            purchase => purchase.syllabusId === selectedSyllabus.id
-          );
+        if (
+          purchasesResponse.data.success &&
+          purchasesResponse.data.purchases
+        ) {
+          const hasPurchasedThisSyllabus =
+            purchasesResponse.data.purchases.some(
+              purchase => purchase.syllabusId === selectedSyllabus.id,
+            );
 
           if (hasPurchasedThisSyllabus) {
-            Alert.alert('Already Purchased', 'You have already purchased this syllabus. You can access it from your dashboard.');
+            Alert.alert(
+              'Already Purchased',
+              'You have already purchased this syllabus. You can access it from your dashboard.',
+            );
           }
         }
 
         setIsEditingExistingData(true);
         setStage('newRegistration');
         setIsNewStudent(false);
-        Alert.alert('Success', 'Student ID verified! You can update your details if needed.');
+        Alert.alert(
+          'Success',
+          'Student ID verified! You can update your details if needed.',
+        );
       } else {
-        Alert.alert('Not Found', 'Student ID not found. Please register as a new student.');
+        Alert.alert(
+          'Not Found',
+          'Student ID not found. Please register as a new student.',
+        );
       }
     } catch (err) {
       console.error('Student verification error:', err);
@@ -677,7 +748,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
 
       if (isNewStudent) {
         const studentData = { ...formData };
-        const response = await axios.post(`${API_BASE_URL}/api/video-register-student`, studentData);
+        const response = await axios.post(
+          `${API_BASE_URL}/api/video-register-student`,
+          studentData,
+        );
 
         if (response.data.success) {
           newStudentId = response.data.studentId;
@@ -688,7 +762,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
       } else if (isEditingExistingData) {
         const response = await axios.put(
           `${API_BASE_URL}/api/video-update-student/${existingStudentDetails.studentId}`,
-          formData
+          formData,
         );
 
         if (!response.data.success) {
@@ -715,7 +789,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
     try {
       const response = await axios.put(
         `${API_BASE_URL}/api/video-update-student/${existingStudentDetails.studentId}`,
-        formData
+        formData,
       );
 
       if (response.data.success) {
@@ -723,7 +797,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
         Alert.alert('Success', 'Student details updated successfully!');
         setStage('syllabusDetails');
       } else {
-        throw new Error(response.data.error || 'Failed to update student details');
+        throw new Error(
+          response.data.error || 'Failed to update student details',
+        );
       }
     } catch (error) {
       console.error('Error updating student details:', error);
@@ -738,7 +814,14 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   };
 
   const handleProceedToSyllabusDetails = () => {
-    if (!formData.name || !formData.age || !formData.gender || !formData.phoneNo || !formData.district || !formData.state) {
+    if (
+      !formData.name ||
+      !formData.age ||
+      !formData.gender ||
+      !formData.phoneNo ||
+      !formData.district ||
+      !formData.state
+    ) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
@@ -753,18 +836,29 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   const createOrder = async () => {
     try {
       const price = selectedSyllabus?.fees;
-      if (price === 0 || price === '0' || price === undefined || price === null || price === '') {
+      if (
+        price === 0 ||
+        price === '0' ||
+        price === undefined ||
+        price === null ||
+        price === ''
+      ) {
         throw new Error('Cannot create payment order for free syllabus');
       }
 
-      const response = await axios.post(`${API_BASE_URL}/api/create-video-order`, {
-        amount: price,
-        notes: {
-          syllabusId: selectedSyllabus?.id || '',
-          syllabusTitle: selectedSyllabus?.title || '',
-          studentId: isNewStudent ? 'new_student' : existingStudentDetails?.studentId || '',
+      const response = await axios.post(
+        `${API_BASE_URL}/api/create-video-order`,
+        {
+          amount: price,
+          notes: {
+            syllabusId: selectedSyllabus?.id || '',
+            syllabusTitle: selectedSyllabus?.title || '',
+            studentId: isNewStudent
+              ? 'new_student'
+              : existingStudentDetails?.studentId || '',
+          },
         },
-      });
+      );
 
       if (response.data.success) {
         return response.data.order;
@@ -777,16 +871,21 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
     }
   };
 
-  const verifyPayment = async (paymentData) => {
+  const verifyPayment = async paymentData => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/verify-video-payment`, {
-        orderId: paymentData.razorpay_order_id,
-        paymentId: paymentData.razorpay_payment_id,
-        signature: paymentData.razorpay_signature,
-        syllabusId: selectedSyllabus?.id || '',
-        filePath: selectedSyllabus?.filePath || '',
-        userId: isNewStudent ? 'new_student' : existingStudentDetails?.studentId || '',
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/verify-video-payment`,
+        {
+          orderId: paymentData.razorpay_order_id,
+          paymentId: paymentData.razorpay_payment_id,
+          signature: paymentData.razorpay_signature,
+          syllabusId: selectedSyllabus?.id || '',
+          filePath: selectedSyllabus?.filePath || '',
+          userId: isNewStudent
+            ? 'new_student'
+            : existingStudentDetails?.studentId || '',
+        },
+      );
 
       return response.data;
     } catch (error) {
@@ -800,31 +899,39 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
       const currentDate = new Date();
       setPurchaseDate(currentDate);
 
-      const durationDays = selectedSyllabus ? parseInt(selectedSyllabus.duration?.split(' ')[0] || 30) : 30;
+      const durationDays = selectedSyllabus
+        ? parseInt(selectedSyllabus.duration?.split(' ')[0] || 30)
+        : 30;
       const accessEndDate = new Date(currentDate);
       accessEndDate.setDate(accessEndDate.getDate() + durationDays);
       setAccessExpiration(accessEndDate);
 
-      const response = await axios.post(`${API_BASE_URL}/api/video-save-syllabus-purchase`, {
-        studentId: studentId,
-        syllabusDetails: {
-          id: selectedSyllabus?.id || '',
-          title: selectedSyllabus?.title || '',
-          category: selectedSyllabus?.category || '',
-          fees: selectedSyllabus?.fees || 0,
-          duration: selectedSyllabus?.duration || '30 Days',
-          description: selectedSyllabus?.description || '',
-          filePath: selectedSyllabus?.filePath || `syllabi/${selectedSyllabus?.id}.pdf` || '',
-          fileUrl: selectedSyllabus?.fileUrl || '',
+      const response = await axios.post(
+        `${API_BASE_URL}/api/video-save-syllabus-purchase`,
+        {
+          studentId: studentId,
+          syllabusDetails: {
+            id: selectedSyllabus?.id || '',
+            title: selectedSyllabus?.title || '',
+            category: selectedSyllabus?.category || '',
+            fees: selectedSyllabus?.fees || 0,
+            duration: selectedSyllabus?.duration || '30 Days',
+            description: selectedSyllabus?.description || '',
+            filePath:
+              selectedSyllabus?.filePath ||
+              `syllabi/${selectedSyllabus?.id}.pdf` ||
+              '',
+            fileUrl: selectedSyllabus?.fileUrl || '',
+          },
+          paymentDetails: {
+            status: 'completed',
+            amount: selectedSyllabus?.fees || 0,
+            paymentId: paymentId,
+            orderId: orderId,
+          },
+          purchaseDate: currentDate.toISOString(),
         },
-        paymentDetails: {
-          status: 'completed',
-          amount: selectedSyllabus?.fees || 0,
-          paymentId: paymentId,
-          orderId: orderId,
-        },
-        purchaseDate: currentDate.toISOString(),
-      });
+      );
 
       return response.data;
     } catch (error) {
@@ -852,7 +959,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
         throw new Error('Failed to get student ID');
       }
 
-      const purchaseSaved = await savePurchaseDetails(paymentVerified, studentId);
+      const purchaseSaved = await savePurchaseDetails(
+        paymentVerified,
+        studentId,
+      );
 
       if (!purchaseSaved.success) {
         throw new Error('Failed to save purchase details');
@@ -875,14 +985,17 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
       return true;
     } catch (error) {
       console.error('Payment processing error:', error);
-      Alert.alert('Error', `Payment processing error: ${error.message}. Please contact support.`);
+      Alert.alert(
+        'Error',
+        `Payment processing error: ${error.message}. Please contact support.`,
+      );
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleRazorpayPayment = async (order) => {
+  const handleRazorpayPayment = async order => {
     const options = {
       description: `${selectedSyllabus?.title || 'Syllabus'} Purchase`,
       image: require('../Images/LOGO.jpg'),
@@ -900,10 +1013,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
     };
 
     RazorpayCheckout.open(options)
-      .then(async (data) => {
+      .then(async data => {
         await processSuccessfulPayment(data, order);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Payment error:', error);
         Alert.alert('Error', 'Payment cancelled or failed');
         setIsLoading(false);
@@ -916,7 +1029,12 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
 
     try {
       const syllabusPrice = selectedSyllabus?.fees;
-      const isFree = syllabusPrice === 0 || syllabusPrice === '0' || syllabusPrice === undefined || syllabusPrice === null || syllabusPrice === '';
+      const isFree =
+        syllabusPrice === 0 ||
+        syllabusPrice === '0' ||
+        syllabusPrice === undefined ||
+        syllabusPrice === null ||
+        syllabusPrice === '';
 
       if (isFree) {
         const freeOrderId = `FREE-ORDER-${Date.now()}`;
@@ -934,7 +1052,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
         const currentDate = new Date();
         setPurchaseDate(currentDate);
 
-        const durationDays = selectedSyllabus?.duration ? parseInt(selectedSyllabus.duration.split(' ')[0]) : 30;
+        const durationDays = selectedSyllabus?.duration
+          ? parseInt(selectedSyllabus.duration.split(' ')[0])
+          : 30;
         const expiryDate = new Date(currentDate);
         expiryDate.setDate(expiryDate.getDate() + durationDays);
         setAccessExpiration(expiryDate);
@@ -948,7 +1068,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
             fees: 0,
             duration: selectedSyllabus?.duration || '30 Days',
             description: selectedSyllabus?.description || '',
-            filePath: selectedSyllabus?.filePath || `syllabi/${selectedSyllabus?.id}.pdf` || '',
+            filePath:
+              selectedSyllabus?.filePath ||
+              `syllabi/${selectedSyllabus?.id}.pdf` ||
+              '',
             fileUrl: selectedSyllabus?.fileUrl || '',
           },
           paymentDetails: {
@@ -960,10 +1083,15 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
           purchaseDate: currentDate.toISOString(),
         };
 
-        const purchaseResponse = await axios.post(`${API_BASE_URL}/api/video-save-syllabus-purchase`, purchaseData);
+        const purchaseResponse = await axios.post(
+          `${API_BASE_URL}/api/video-save-syllabus-purchase`,
+          purchaseData,
+        );
 
         if (!purchaseResponse.data || !purchaseResponse.data.success) {
-          throw new Error(purchaseResponse.data?.message || 'Failed to save purchase details');
+          throw new Error(
+            purchaseResponse.data?.message || 'Failed to save purchase details',
+          );
         }
 
         const studentDetails = {
@@ -1005,7 +1133,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
           <View style={styles.stageContainer}>
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>Video Syllabus Registration</Text>
+                <Text style={styles.cardHeaderText}>
+                  Video Syllabus Registration
+                </Text>
               </View>
               <View style={styles.cardBody}>
                 {error ? (
@@ -1020,7 +1150,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   <TextInput
                     style={styles.textInput}
                     value={studentId}
-                    onChangeText={(value) => {
+                    onChangeText={value => {
                       const numericValue = value.replace(/\D/g, '');
                       if (numericValue.length <= 6) {
                         setStudentId(numericValue);
@@ -1037,7 +1167,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                 </View>
 
                 <TouchableOpacity
-                  style={[styles.primaryButton, isLoading && styles.buttonDisabled]}
+                  style={[
+                    styles.primaryButton,
+                    isLoading && styles.buttonDisabled,
+                  ]}
                   onPress={handleStudentIdVerification}
                   disabled={isLoading}
                 >
@@ -1046,7 +1179,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   ) : (
                     <>
                       <Icon name="verified-user" size={20} color="#fff" />
-                      <Text style={styles.primaryButtonText}>Verify Student ID</Text>
+                      <Text style={styles.primaryButtonText}>
+                        Verify Student ID
+                      </Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -1075,7 +1210,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   }}
                 >
                   <Icon name="person-add" size={20} color="#3b82f6" />
-                  <Text style={styles.secondaryButtonText}>Register as New Student</Text>
+                  <Text style={styles.secondaryButtonText}>
+                    Register as New Student
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1091,14 +1228,22 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
           >
             <ScrollView
               style={styles.scrollableContainer}
-              contentContainerStyle={[styles.scrollableContent, { paddingBottom: 113 }]}
+              contentContainerStyle={[
+                styles.scrollableContent,
+                { paddingBottom: 113 },
+              ]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              onScrollBeginDrag={() =>
+                showGenderDropdown && setShowGenderDropdown(false)
+              }
             >
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardHeaderText}>
-                    {isEditingExistingData ? 'Update Student Information' : 'New Student Registration'}
+                    {isEditingExistingData
+                      ? 'Update Student Information'
+                      : 'New Student Registration'}
                   </Text>
                 </View>
                 <View style={styles.cardBody}>
@@ -1106,7 +1251,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                     <View style={styles.infoAlert}>
                       <Icon name="info" size={20} color="#3b82f6" />
                       <View style={styles.infoAlertContent}>
-                        <Text style={styles.infoAlertTitle}>You are editing existing student data.</Text>
+                        <Text style={styles.infoAlertTitle}>
+                          You are editing existing student data.
+                        </Text>
                         <Text style={styles.infoAlertText}>
                           Student ID: {existingStudentDetails.studentId}
                         </Text>
@@ -1119,34 +1266,92 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                     <TextInput
                       style={styles.textInput}
                       value={formData.name}
-                      onChangeText={(value) => handleFormChange('name', value)}
+                      onChangeText={value => handleFormChange('name', value)}
                       placeholder="Enter full name"
                       placeholderTextColor="#9ca3af"
                     />
                   </View>
 
                   <View style={styles.inputRow}>
-                    <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                    <View
+                      style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}
+                    >
                       <Text style={styles.inputLabel}>Age *</Text>
                       <TextInput
                         style={styles.textInput}
                         value={formData.age}
-                        onChangeText={(value) => handleFormChange('age', value)}
+                        onChangeText={value => handleFormChange('age', value)}
                         placeholder="Age"
                         keyboardType="numeric"
                         placeholderTextColor="#9ca3af"
                       />
                     </View>
 
-                    <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                    <View
+                      style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}
+                    >
                       <Text style={styles.inputLabel}>Gender *</Text>
-                      <TextInput
-                        style={styles.textInput}
-                        value={formData.gender}
-                        onChangeText={(value) => handleFormChange('gender', value)}
-                        placeholder="E.g Male, Female, Other"
-                        placeholderTextColor="#9ca3af"
-                      />
+                      <View style={styles.genderSelectorContainer}>
+                        <TouchableOpacity
+                          style={[
+                            styles.genderSelector,
+                            !formData.gender && styles.genderPlaceholder,
+                          ]}
+                          onPress={() =>
+                            setShowGenderDropdown(!showGenderDropdown)
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.genderText,
+                              !formData.gender && styles.genderPlaceholderText,
+                            ]}
+                          >
+                            {formData.gender || 'Select Gender'}
+                          </Text>
+                          <Icon
+                            name={
+                              showGenderDropdown
+                                ? 'arrow-drop-up'
+                                : 'arrow-drop-down'
+                            }
+                            size={24}
+                            color="#1a3b5d"
+                          />
+                        </TouchableOpacity>
+
+                        {showGenderDropdown && (
+                          <View style={styles.dropdownContainer}>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Male');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Male</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Female');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Female</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Other');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Other</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
                     </View>
                   </View>
 
@@ -1168,7 +1373,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                     <TextInput
                       style={styles.textInput}
                       value={formData.email}
-                      onChangeText={(value) => handleFormChange('email', value)}
+                      onChangeText={value => handleFormChange('email', value)}
                       placeholder="Enter email address"
                       keyboardType="email-address"
                       autoCapitalize="none"
@@ -1177,23 +1382,29 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   </View>
 
                   <View style={styles.inputRow}>
-                    <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                    <View
+                      style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}
+                    >
                       <Text style={styles.inputLabel}>District *</Text>
                       <TextInput
                         style={styles.textInput}
                         value={formData.district}
-                        onChangeText={(value) => handleFormChange('district', value)}
+                        onChangeText={value =>
+                          handleFormChange('district', value)
+                        }
                         placeholder="Enter district"
                         placeholderTextColor="#9ca3af"
                       />
                     </View>
 
-                    <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                    <View
+                      style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}
+                    >
                       <Text style={styles.inputLabel}>State *</Text>
                       <TextInput
                         style={styles.textInput}
                         value={formData.state}
-                        onChangeText={(value) => handleFormChange('state', value)}
+                        onChangeText={value => handleFormChange('state', value)}
                         placeholder="E.g Karnataka"
                         placeholderTextColor="#9ca3af"
                       />
@@ -1203,18 +1414,38 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   <TouchableOpacity
                     style={[
                       styles.primaryButton,
-                      (!formData.name || !formData.age || !formData.gender || !formData.phoneNo || !formData.district || !formData.state) && styles.buttonDisabled,
+                      (!formData.name ||
+                        !formData.age ||
+                        !formData.gender ||
+                        !formData.phoneNo ||
+                        !formData.district ||
+                        !formData.state) &&
+                        styles.buttonDisabled,
                     ]}
                     onPress={handleProceedToSyllabusDetails}
-                    disabled={!formData.name || !formData.age || !formData.gender || !formData.phoneNo || !formData.district || !formData.state}
+                    disabled={
+                      !formData.name ||
+                      !formData.age ||
+                      !formData.gender ||
+                      !formData.phoneNo ||
+                      !formData.district ||
+                      !formData.state
+                    }
                   >
                     <Icon name="arrow-forward" size={20} color="#fff" />
-                    <Text style={styles.primaryButtonText}>Proceed to Syllabus Details</Text>
+                    <Text style={styles.primaryButtonText}>
+                      Proceed to Syllabus Details
+                    </Text>
                   </TouchableOpacity>
 
                   {isEditingExistingData && (
-                    <TouchableOpacity style={styles.outlineButton} onPress={handleProceedWithExistingData}>
-                      <Text style={styles.outlineButtonText}>Continue with Original Data</Text>
+                    <TouchableOpacity
+                      style={styles.outlineButton}
+                      onPress={handleProceedWithExistingData}
+                    >
+                      <Text style={styles.outlineButtonText}>
+                        Continue with Original Data
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -1228,7 +1459,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
           <View style={styles.stageContainer}>
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <Text style={styles.cardHeaderText}>Video Syllabus Purchase Confirmation</Text>
+                <Text style={styles.cardHeaderText}>
+                  Video Syllabus Purchase Confirmation
+                </Text>
               </View>
               <View style={styles.cardBody}>
                 <Text style={styles.sectionTitle}>Syllabus Details</Text>
@@ -1236,45 +1469,64 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                 <View style={styles.detailsBox}>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Title:</Text>
-                    <Text style={styles.detailValue}>{selectedSyllabus?.title || 'Sample Syllabus'}</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedSyllabus?.title || 'Sample Syllabus'}
+                    </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Category:</Text>
-                    <Text style={styles.detailValue}>{selectedSyllabus?.category || 'General'}</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedSyllabus?.category || 'General'}
+                    </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Price:</Text>
                     <Text style={[styles.detailValue, styles.priceText]}>
-                      {selectedSyllabus?.fees === 0 || selectedSyllabus?.fees === '0' ? 'FREE' : `₹${selectedSyllabus?.fees || '0'}`}
+                      {selectedSyllabus?.fees === 0 ||
+                      selectedSyllabus?.fees === '0'
+                        ? 'FREE'
+                        : `₹${selectedSyllabus?.fees || '0'}`}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Validity:</Text>
-                    <Text style={styles.detailValue}>{selectedSyllabus?.duration || '30 Days'}</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedSyllabus?.duration || '30 Days'}
+                    </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Student Name:</Text>
                     <Text style={styles.detailValue}>
-                      {isNewStudent ? formData.name : isEditingExistingData ? formData.name : existingStudentDetails?.name || ''}
+                      {isNewStudent
+                        ? formData.name
+                        : isEditingExistingData
+                        ? formData.name
+                        : existingStudentDetails?.name || ''}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Student ID:</Text>
                     <Text style={styles.detailValue}>
-                      {isNewStudent ? 'Will be generated' : existingStudentDetails?.studentId || ''}
+                      {isNewStudent
+                        ? 'Will be generated'
+                        : existingStudentDetails?.studentId || ''}
                     </Text>
                   </View>
                   <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
                     <Text style={styles.detailLabel}>Description:</Text>
                   </View>
                   <Text style={styles.descriptionText}>
-                    {selectedSyllabus?.description || 'Comprehensive video syllabus for exam preparation.'}
+                    {selectedSyllabus?.description ||
+                      'Comprehensive video syllabus for exam preparation.'}
                   </Text>
                 </View>
 
                 {!isPurchased ? (
                   <TouchableOpacity
-                    style={[styles.purchaseButton, isLoading && styles.buttonDisabled]}
+                    style={[
+                      styles.purchaseButton,
+                      isLoading && styles.buttonDisabled,
+                    ]}
                     onPress={handleSyllabusPurchase}
                     disabled={isLoading}
                   >
@@ -1283,31 +1535,46 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                     ) : (
                       <>
                         <Icon name="shopping-cart" size={20} color="#fff" />
-                        <Text style={styles.purchaseButtonText}>Confirm Purchase</Text>
+                        <Text style={styles.purchaseButtonText}>
+                          Confirm Purchase
+                        </Text>
                       </>
                     )}
                   </TouchableOpacity>
                 ) : (
                   <View>
-                    {selectedSyllabus?.fees !== 0 && selectedSyllabus?.fees !== '0' && (
-                      <View style={styles.warningBox}>
-                        <Icon name="warning" size={20} color="#92400e" />
-                        <Text style={styles.warningText}>
-                          Important: If you don't download your invoice now, you won't be able to access it in the future.
-                        </Text>
-                      </View>
-                    )}
+                    {selectedSyllabus?.fees !== 0 &&
+                      selectedSyllabus?.fees !== '0' && (
+                        <View style={styles.warningBox}>
+                          <Icon name="warning" size={20} color="#92400e" />
+                          <Text style={styles.warningText}>
+                            Important: If you don't download your invoice now,
+                            you won't be able to access it in the future.
+                          </Text>
+                        </View>
+                      )}
 
-                    {selectedSyllabus?.fees !== 0 && selectedSyllabus?.fees !== '0' && (
-                      <TouchableOpacity style={styles.invoiceButton} onPress={handleDownloadInvoice}>
-                        <Icon name="receipt" size={20} color="#fff" />
-                        <Text style={styles.invoiceButtonText}>Download Invoice</Text>
-                      </TouchableOpacity>
-                    )}
+                    {selectedSyllabus?.fees !== 0 &&
+                      selectedSyllabus?.fees !== '0' && (
+                        <TouchableOpacity
+                          style={styles.invoiceButton}
+                          onPress={handleDownloadInvoice}
+                        >
+                          <Icon name="receipt" size={20} color="#fff" />
+                          <Text style={styles.invoiceButtonText}>
+                            Download Invoice
+                          </Text>
+                        </TouchableOpacity>
+                      )}
 
-                    <TouchableOpacity style={styles.homeButton} onPress={handleBackToHome}>
+                    <TouchableOpacity
+                      style={styles.homeButton}
+                      onPress={handleBackToHome}
+                    >
                       <Icon name="home" size={20} color="#fff" />
-                      <Text style={styles.homeButtonText}>Back to Dashboard</Text>
+                      <Text style={styles.homeButtonText}>
+                        Back to Dashboard
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -1328,7 +1595,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
         <View style={styles.errorContainer}>
           <Icon name="error" size={60} color="#dc2626" />
           <Text style={styles.errorMessage}>No syllabus selected</Text>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => navigation.goBack()}
+          >
             <Text style={styles.backBtnText}>Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -1341,7 +1611,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
       <StatusBar backgroundColor="#1a3b5d" barStyle="light-content" />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBackButton} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.headerBackButton}
+          onPress={() => navigation.goBack()}
+        >
           <Icon name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Syllabus Purchase</Text>
@@ -1356,7 +1629,11 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
         {renderContent()}
       </ScrollView>
 
-      <Modal visible={showSyllabusDetailsModal} animationType="fade" transparent={true}>
+      <Modal
+        visible={showSyllabusDetailsModal}
+        animationType="fade"
+        transparent={true}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -1368,15 +1645,21 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                 <View>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalLabel}>Syllabus:</Text>
-                    <Text style={styles.modalValue}>{selectedSyllabus?.title}</Text>
+                    <Text style={styles.modalValue}>
+                      {selectedSyllabus?.title}
+                    </Text>
                   </View>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalLabel}>Student Name:</Text>
-                    <Text style={styles.modalValue}>{purchasedStudentDetails.name}</Text>
+                    <Text style={styles.modalValue}>
+                      {purchasedStudentDetails.name}
+                    </Text>
                   </View>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalLabel}>Student ID:</Text>
-                    <Text style={styles.modalValue}>{purchasedStudentDetails.studentId}</Text>
+                    <Text style={styles.modalValue}>
+                      {purchasedStudentDetails.studentId}
+                    </Text>
                   </View>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalLabel}>Payment ID:</Text>
@@ -1384,11 +1667,15 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   </View>
                   <View style={styles.modalDetailRow}>
                     <Text style={styles.modalLabel}>Valid Until:</Text>
-                    <Text style={styles.modalValue}>{accessExpiration && formatDate(accessExpiration)}</Text>
+                    <Text style={styles.modalValue}>
+                      {accessExpiration && formatDate(accessExpiration)}
+                    </Text>
                   </View>
                   <View style={styles.downloadingBox}>
                     <ActivityIndicator color="#3b82f6" size="small" />
-                    <Text style={styles.downloadingText}>Your purchase receipt is being downloaded...</Text>
+                    <Text style={styles.downloadingText}>
+                      Your purchase receipt is being downloaded...
+                    </Text>
                   </View>
                   <View style={styles.successBox}>
                     <Icon name="check" size={16} color="#059669" />
@@ -1813,6 +2100,58 @@ const styles = StyleSheet.create({
   scrollableContent: {
     flexGrow: 1,
   },
+  // Gender Dropdown Styles
+genderSelectorContainer: {
+  position: 'relative',
+},
+genderSelector: {
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  borderRadius: 8,
+  backgroundColor: '#fff',
+  height: 50,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 12,
+},
+genderText: {
+  fontSize: 16,
+  color: '#374151',
+},
+genderPlaceholder: {
+  // Style when no gender is selected
+},
+genderPlaceholderText: {
+  color: '#9ca3af',
+},
+dropdownContainer: {
+  position: 'absolute',
+  top: 52,
+  left: 0,
+  right: 0,
+  backgroundColor: '#fff',
+  borderWidth: 1,
+  borderColor: '#d1d5db',
+  borderRadius: 8,
+  zIndex: 1000,
+  elevation: 5,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 3.84,
+  marginTop: 2,
+},
+dropdownItem: {
+  paddingHorizontal: 12,
+  paddingVertical: 14,
+  borderBottomWidth: 1,
+  borderBottomColor: '#f1f5f9',
+},
+dropdownText: {
+  fontSize: 16,
+  color: '#374151',
+},
 });
 
 export default VideoSyllabusPurchase;

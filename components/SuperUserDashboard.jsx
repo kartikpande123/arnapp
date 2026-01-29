@@ -56,26 +56,49 @@ const SuperUserDashboard = ({ navigation }) => {
   const [purchaseExpiry, setPurchaseExpiry] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [paymentId, setPaymentId] = useState(null);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   const indianStates = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
-    'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
-    'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
-    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
-    'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
   ];
 
   useEffect(() => {
     fetchSubscriptions();
   }, []);
 
-   const getBase64Logo = () => {
-  // This is your correct Firebase Storage public URL
-  return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
-};
+  const getBase64Logo = () => {
+    // This is your correct Firebase Storage public URL
+    return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
+  };
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     return new Date(date).toLocaleString('en-IN', {
       day: '2-digit',
       month: 'short',
@@ -113,7 +136,7 @@ const SuperUserDashboard = ({ navigation }) => {
   };
 
   // Handle purchase button click
-  const handlePurchaseClick = (sub) => {
+  const handlePurchaseClick = sub => {
     setSelectedSubscription(sub);
     setShowRegistrationModal(true);
     setUserId('');
@@ -139,7 +162,9 @@ const SuperUserDashboard = ({ navigation }) => {
     setIsCheckingUser(true);
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/super-user-verify/${userId}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/super-user-verify/${userId}`,
+      );
 
       if (response.data.exists) {
         const userDetails = response.data.userDetails;
@@ -155,7 +180,10 @@ const SuperUserDashboard = ({ navigation }) => {
         setIsExistingUser(true);
         Alert.alert('Success', 'User ID verified successfully!');
       } else {
-        Alert.alert('Not Found', 'User ID not found. Please fill in the registration form.');
+        Alert.alert(
+          'Not Found',
+          'User ID not found. Please fill in the registration form.',
+        );
         setIsExistingUser(false);
       }
     } catch (error) {
@@ -408,46 +436,66 @@ const SuperUserDashboard = ({ navigation }) => {
                 <div class="info-label">Contact</div>
                 <div class="info-value">${userDetails.phoneNo}</div>
               </div>
-              ${userDetails.email ? `
+              ${
+                userDetails.email
+                  ? `
                 <div class="info-item">
                   <div class="info-label">Email</div>
                   <div class="info-value">${userDetails.email}</div>
                 </div>
-              ` : ''}
+              `
+                  : ''
+              }
               <div class="info-item">
                 <div class="info-label">Location</div>
-                <div class="info-value">${userDetails.district}, ${userDetails.state}</div>
+                <div class="info-value">${userDetails.district}, ${
+      userDetails.state
+    }</div>
               </div>
             </div>
 
             <h3 class="section-title">Subscription Details</h3>
             <div class="subscription-section">
               <div class="subscription-title">Super User Plan</div>
-              <div class="subscription-name">${subscription.month}-Month Subscription</div>
+              <div class="subscription-name">${
+                subscription.month
+              }-Month Subscription</div>
               <div class="subscription-details">
                 <div class="subscription-detail-item">
                   <div class="subscription-detail-label">Plan Month</div>
-                  <div class="subscription-detail-value">${subscription.month} Month${subscription.month > 1 ? 's' : ''}</div>
+                  <div class="subscription-detail-value">${
+                    subscription.month
+                  } Month${subscription.month > 1 ? 's' : ''}</div>
                 </div>
                 <div class="subscription-detail-item">
                   <div class="subscription-detail-label">Amount Paid</div>
-                  <div class="subscription-detail-value">₹${subscription.finalPrice}</div>
+                  <div class="subscription-detail-value">₹${
+                    subscription.finalPrice
+                  }</div>
                 </div>
                 <div class="subscription-detail-item">
                   <div class="subscription-detail-label">Discount</div>
-                  <div class="subscription-detail-value">${subscription.discountPercent}% OFF</div>
+                  <div class="subscription-detail-value">${
+                    subscription.discountPercent
+                  }% OFF</div>
                 </div>
                 <div class="subscription-detail-item">
                   <div class="subscription-detail-label">Total Days</div>
-                  <div class="subscription-detail-value">${subscription.totalDays} Days</div>
+                  <div class="subscription-detail-value">${
+                    subscription.totalDays
+                  } Days</div>
                 </div>
                 <div class="subscription-detail-item">
                   <div class="subscription-detail-label">Bonus Days</div>
-                  <div class="subscription-detail-value">${subscription.extraDays} Days</div>
+                  <div class="subscription-detail-value">${
+                    subscription.extraDays
+                  } Days</div>
                 </div>
                 <div class="subscription-detail-item">
                   <div class="subscription-detail-label">Purchase Date</div>
-                  <div class="subscription-detail-value">${formatDate(currentDate)}</div>
+                  <div class="subscription-detail-value">${formatDate(
+                    currentDate,
+                  )}</div>
                 </div>
               </div>
               <div class="expiry-box">
@@ -480,7 +528,13 @@ const SuperUserDashboard = ({ navigation }) => {
   };
 
   // Generate Invoice PDF HTML
-  const generateInvoicePDF = (userDetails, subscription, expiryDate, paymentId, orderId) => {
+  const generateInvoicePDF = (
+    userDetails,
+    subscription,
+    expiryDate,
+    paymentId,
+    orderId,
+  ) => {
     const logoUri = getBase64Logo();
 
     return `
@@ -646,7 +700,11 @@ const SuperUserDashboard = ({ navigation }) => {
           <div class="info-section">
             <div class="info-left">
               <div class="info-label">Invoice Number:</div>
-              <div class="info-value">INV-${paymentId ? paymentId.substring(0, 8) : new Date().getTime().toString().substring(0, 8)}</div>
+              <div class="info-value">INV-${
+                paymentId
+                  ? paymentId.substring(0, 8)
+                  : new Date().getTime().toString().substring(0, 8)
+              }</div>
               
               <div class="info-label">Payment ID:</div>
               <div class="info-value">${paymentId || 'N/A'}</div>
@@ -657,7 +715,9 @@ const SuperUserDashboard = ({ navigation }) => {
             
             <div class="info-right">
               <div class="info-label">Date:</div>
-              <div class="info-value">${new Date().toLocaleDateString('en-IN')}</div>
+              <div class="info-value">${new Date().toLocaleDateString(
+                'en-IN',
+              )}</div>
               
               <div class="info-label">Bill To:</div>
               <div class="info-value">
@@ -680,13 +740,19 @@ const SuperUserDashboard = ({ navigation }) => {
 
           <div class="table-content">
             <div class="description-text">
-              <strong>Super User Subscription:</strong> ${subscription.month}-Month Plan
+              <strong>Super User Subscription:</strong> ${
+                subscription.month
+              }-Month Plan
             </div>
             <div class="description-text">
-              <strong>Validity:</strong> ${subscription.totalDays} days (including ${subscription.extraDays} bonus days)
+              <strong>Validity:</strong> ${
+                subscription.totalDays
+              } days (including ${subscription.extraDays} bonus days)
             </div>
             <div class="description-text">
-              <strong>Discount Applied:</strong> ${subscription.discountPercent}%
+              <strong>Discount Applied:</strong> ${
+                subscription.discountPercent
+              }%
             </div>
             <div class="description-text">
               <strong>Access Until:</strong> ${formatDate(expiryDate)}
@@ -714,7 +780,11 @@ const SuperUserDashboard = ({ navigation }) => {
   };
 
   // Handle PDF Downloads
-  const handleDownloadUserPDF = async (userDetails, subscription, expiryDate) => {
+  const handleDownloadUserPDF = async (
+    userDetails,
+    subscription,
+    expiryDate,
+  ) => {
     try {
       const html = generateUserPDF(userDetails, subscription, expiryDate);
       await RNPrint.print({ html });
@@ -727,7 +797,10 @@ const SuperUserDashboard = ({ navigation }) => {
 
   const handleDownloadInvoice = async () => {
     if (!purchasedUserDetails || !selectedSubscription) {
-      Alert.alert('Error', 'Purchase details not found. Cannot generate invoice.');
+      Alert.alert(
+        'Error',
+        'Purchase details not found. Cannot generate invoice.',
+      );
       return;
     }
 
@@ -737,7 +810,7 @@ const SuperUserDashboard = ({ navigation }) => {
         selectedSubscription,
         purchaseExpiry,
         paymentId,
-        orderId
+        orderId,
       );
       await RNPrint.print({ html });
       Alert.alert('Success', 'Invoice downloaded successfully!');
@@ -749,8 +822,14 @@ const SuperUserDashboard = ({ navigation }) => {
 
   // Process payment
   const handleProceedToPurchase = async () => {
-    if (!userFormData.name || !userFormData.age || !userFormData.gender ||
-        !userFormData.phoneNo || !userFormData.district || !userFormData.state) {
+    if (
+      !userFormData.name ||
+      !userFormData.age ||
+      !userFormData.gender ||
+      !userFormData.phoneNo ||
+      !userFormData.district ||
+      !userFormData.state
+    ) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
@@ -758,13 +837,16 @@ const SuperUserDashboard = ({ navigation }) => {
     setLoading(true);
 
     try {
-      const orderRes = await axios.post(`${API_BASE_URL}/api/create-super-user-order`, {
-        amount: selectedSubscription.finalPrice,
-        notes: {
-          planMonth: selectedSubscription.month,
-          subscriptionId: selectedSubscription.id,
+      const orderRes = await axios.post(
+        `${API_BASE_URL}/api/create-super-user-order`,
+        {
+          amount: selectedSubscription.finalPrice,
+          notes: {
+            planMonth: selectedSubscription.month,
+            subscriptionId: selectedSubscription.id,
+          },
         },
-      });
+      );
 
       if (!orderRes.data.success) {
         throw new Error('Failed to create order');
@@ -789,16 +871,19 @@ const SuperUserDashboard = ({ navigation }) => {
       };
 
       RazorpayCheckout.open(options)
-        .then(async (data) => {
+        .then(async data => {
           try {
-            const verifyRes = await axios.post(`${API_BASE_URL}/api/verify-super-user-payment`, {
-              orderId: data.razorpay_order_id,
-              paymentId: data.razorpay_payment_id,
-              signature: data.razorpay_signature,
-              userId: userId || null,
-              subscriptionId: selectedSubscription.id,
-              planMonth: selectedSubscription.month,
-            });
+            const verifyRes = await axios.post(
+              `${API_BASE_URL}/api/verify-super-user-payment`,
+              {
+                orderId: data.razorpay_order_id,
+                paymentId: data.razorpay_payment_id,
+                signature: data.razorpay_signature,
+                userId: userId || null,
+                subscriptionId: selectedSubscription.id,
+                planMonth: selectedSubscription.month,
+              },
+            );
 
             if (!verifyRes.data.success) {
               Alert.alert('Error', 'Payment Verification Failed!');
@@ -807,35 +892,40 @@ const SuperUserDashboard = ({ navigation }) => {
 
             const purchaseDate = new Date();
             const expiryDate = new Date();
-            expiryDate.setDate(expiryDate.getDate() + selectedSubscription.totalDays);
+            expiryDate.setDate(
+              expiryDate.getDate() + selectedSubscription.totalDays,
+            );
 
-            const completePurchaseRes = await axios.post(`${API_BASE_URL}/api/super-user-complete-purchase`, {
-              userId: userId || null,
-              name: userFormData.name,
-              age: userFormData.age,
-              gender: userFormData.gender,
-              phoneNo: userFormData.phoneNo,
-              email: userFormData.email,
-              district: userFormData.district,
-              state: userFormData.state,
-              subscriptionDetails: {
-                id: selectedSubscription.id,
-                month: selectedSubscription.month,
-                price: selectedSubscription.price,
-                discountPercent: selectedSubscription.discountPercent,
-                finalPrice: selectedSubscription.finalPrice,
-                totalDays: selectedSubscription.totalDays,
-                extraDays: selectedSubscription.extraDays
+            const completePurchaseRes = await axios.post(
+              `${API_BASE_URL}/api/super-user-complete-purchase`,
+              {
+                userId: userId || null,
+                name: userFormData.name,
+                age: userFormData.age,
+                gender: userFormData.gender,
+                phoneNo: userFormData.phoneNo,
+                email: userFormData.email,
+                district: userFormData.district,
+                state: userFormData.state,
+                subscriptionDetails: {
+                  id: selectedSubscription.id,
+                  month: selectedSubscription.month,
+                  price: selectedSubscription.price,
+                  discountPercent: selectedSubscription.discountPercent,
+                  finalPrice: selectedSubscription.finalPrice,
+                  totalDays: selectedSubscription.totalDays,
+                  extraDays: selectedSubscription.extraDays,
+                },
+                paymentDetails: {
+                  orderId: data.razorpay_order_id,
+                  paymentId: data.razorpay_payment_id,
+                  amount: selectedSubscription.finalPrice,
+                  status: 'completed',
+                },
+                purchaseDate: purchaseDate.toISOString(),
+                expiryDate: expiryDate.toISOString(),
               },
-              paymentDetails: {
-                orderId: data.razorpay_order_id,
-                paymentId: data.razorpay_payment_id,
-                amount: selectedSubscription.finalPrice,
-                status: 'completed'
-              },
-              purchaseDate: purchaseDate.toISOString(),
-              expiryDate: expiryDate.toISOString()
-            });
+            );
 
             if (completePurchaseRes.data.success) {
               const finalUserId = completePurchaseRes.data.userId;
@@ -845,7 +935,7 @@ const SuperUserDashboard = ({ navigation }) => {
 
               setPurchasedUserDetails({
                 ...userFormData,
-                userId: finalUserId
+                userId: finalUserId,
               });
               setPurchaseExpiry(expiryDate);
 
@@ -856,22 +946,28 @@ const SuperUserDashboard = ({ navigation }) => {
                 handleDownloadUserPDF(
                   { ...userFormData, userId: finalUserId },
                   selectedSubscription,
-                  expiryDate
+                  expiryDate,
                 );
               }, 1000);
 
-              Alert.alert('Success', 'Payment Successful! Super User Subscription Activated.');
+              Alert.alert(
+                'Success',
+                'Payment Successful! Super User Subscription Activated.',
+              );
             } else {
               Alert.alert('Error', 'Failed to save purchase details!');
             }
           } catch (error) {
             console.error('Error in payment handler:', error);
-            Alert.alert('Error', 'Error processing payment. Please contact support.');
+            Alert.alert(
+              'Error',
+              'Error processing payment. Please contact support.',
+            );
           } finally {
             setLoading(false);
           }
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Payment error:', error);
           Alert.alert('Error', 'Payment cancelled or failed');
           setLoading(false);
@@ -880,7 +976,10 @@ const SuperUserDashboard = ({ navigation }) => {
       setLoading(false);
     } catch (error) {
       console.error('Purchase Error:', error);
-      Alert.alert('Error', error.response?.data?.message || 'Something went wrong during purchase');
+      Alert.alert(
+        'Error',
+        error.response?.data?.message || 'Something went wrong during purchase',
+      );
       setLoading(false);
     }
   };
@@ -890,54 +989,83 @@ const SuperUserDashboard = ({ navigation }) => {
     { icon: '📄', title: 'Unlimited PDF Syllabus', color: '#4ECDC4' },
     { icon: '🎥', title: 'Unlimited Video Syllabus', color: '#FFD93D' },
     { icon: '📚', title: 'Unlimited Practice Tests', color: '#95E1D3' },
-    { icon: '🎧', title: 'Quick Admin Support', color: '#A78BFA' }
+    { icon: '🎧', title: 'Quick Admin Support', color: '#A78BFA' },
   ];
 
   const usageSteps = [
     {
       number: '01',
       title: 'Practice Tests',
-      description: 'Navigate to the Practice Test dashboard, click "My Practice Tests", and enter your Super User ID to unlock all available practice tests.',
+      description:
+        'Navigate to the Practice Test dashboard, click "My Practice Tests", and enter your Super User ID to unlock all available practice tests.',
       icon: '📚',
-      color: '#8B5CF6'
+      color: '#8B5CF6',
     },
     {
       number: '02',
       title: 'PDF Syllabus',
-      description: 'Go to the PDF Syllabus dashboard, click "My Study Material", and input your Super User ID to access all PDF syllabus materials.',
+      description:
+        'Go to the PDF Syllabus dashboard, click "My Study Material", and input your Super User ID to access all PDF syllabus materials.',
       icon: '📄',
-      color: '#3B82F6'
+      color: '#3B82F6',
     },
     {
       number: '03',
       title: 'Video Syllabus',
-      description: 'Visit the Video Syllabus dashboard, select "My Video Syllabus Material", and enter your Super User ID to view all video syllabus content.',
+      description:
+        'Visit the Video Syllabus dashboard, select "My Video Syllabus Material", and enter your Super User ID to view all video syllabus content.',
       icon: '🎥',
-      color: '#10B981'
+      color: '#10B981',
     },
     {
       number: '04',
       title: 'Live Exam Registration',
-      description: 'On the exam registration payment page, click "Are you a Super User? Click here", enter your User ID to bypass payment. Click "Complete Registration" to download your Live Exam ID.',
+      description:
+        'On the exam registration payment page, click "Are you a Super User? Click here", enter your User ID to bypass payment. Click "Complete Registration" to download your Live Exam ID.',
       icon: '⚡',
-      color: '#F59E0B'
+      color: '#F59E0B',
     },
     {
       number: '05',
       title: '24/7 Support Available',
-      description: 'If you encounter any issues or have questions, our admin team is available around the clock through the Help section to assist you.',
+      description:
+        'If you encounter any issues or have questions, our admin team is available around the clock through the Help section to assist you.',
       icon: '🎧',
-      color: '#EC4899'
-    }
+      color: '#EC4899',
+    },
   ];
 
   const importantNotes = [
-    { icon: '🔒', title: 'Non-Refundable', text: 'Once purchased, super user subscriptions are non-refundable.' },
-    { icon: '🎫', title: 'Reusable User ID', text: 'Your User ID can be used for future purchases without re-registration.' },
-    { icon: '⏰', title: 'Auto Expiry', text: 'Super user access will expire automatically after the subscription period.' },
-    { icon: '🔐', title: 'Keep ID Safe', text: 'Keep your 6-digit User ID safe for future transactions.' },
-    { icon: '💬', title: '24/7 Support', text: 'For support or queries, contact our help center anytime.' },
-    { icon: '🔑', title: 'Lost User ID?', text: 'If you lose your User ID, contact admin team for instant recovery.' }
+    {
+      icon: '🔒',
+      title: 'Non-Refundable',
+      text: 'Once purchased, super user subscriptions are non-refundable.',
+    },
+    {
+      icon: '🎫',
+      title: 'Reusable User ID',
+      text: 'Your User ID can be used for future purchases without re-registration.',
+    },
+    {
+      icon: '⏰',
+      title: 'Auto Expiry',
+      text: 'Super user access will expire automatically after the subscription period.',
+    },
+    {
+      icon: '🔐',
+      title: 'Keep ID Safe',
+      text: 'Keep your 6-digit User ID safe for future transactions.',
+    },
+    {
+      icon: '💬',
+      title: '24/7 Support',
+      text: 'For support or queries, contact our help center anytime.',
+    },
+    {
+      icon: '🔑',
+      title: 'Lost User ID?',
+      text: 'If you lose your User ID, contact admin team for instant recovery.',
+    },
   ];
 
   if (loading && subscriptions.length === 0) {
@@ -959,7 +1087,10 @@ const SuperUserDashboard = ({ navigation }) => {
         <View style={styles.errorContainer}>
           <Icon name="error" size={60} color="#dc2626" />
           <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={fetchSubscriptions}>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={fetchSubscriptions}
+          >
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
@@ -989,28 +1120,39 @@ const SuperUserDashboard = ({ navigation }) => {
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#667eea']} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#667eea']}
+          />
         }
       >
         {/* Subscription Plans */}
         <View style={styles.plansSection}>
           {subscriptions.map((sub, index) => (
-            <View key={sub.id} style={[styles.pricingCard, index === 1 && styles.popularCard]}>
+            <View
+              key={sub.id}
+              style={[styles.pricingCard, index === 1 && styles.popularCard]}
+            >
               {index === 1 && (
                 <View style={styles.popularBadge}>
                   <Icon name="star" size={12} color="#fff" />
                   <Text style={styles.popularBadgeText}>MOST POPULAR</Text>
                 </View>
               )}
-              
+
               <View style={styles.planHeader}>
-                <Text style={styles.planTitle}>{sub.month} Month{sub.month > 1 ? 's' : ''}</Text>
+                <Text style={styles.planTitle}>
+                  {sub.month} Month{sub.month > 1 ? 's' : ''}
+                </Text>
                 <View style={styles.priceContainer}>
                   <Text style={styles.originalPrice}>₹{sub.price}</Text>
                   <View style={styles.finalPriceRow}>
                     <Text style={styles.finalPrice}>₹{sub.finalPrice}</Text>
                     <View style={styles.discountBadge}>
-                      <Text style={styles.discountBadgeText}>{sub.discountPercent}% OFF</Text>
+                      <Text style={styles.discountBadgeText}>
+                        {sub.discountPercent}% OFF
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -1019,11 +1161,17 @@ const SuperUserDashboard = ({ navigation }) => {
               <View style={styles.planDetails}>
                 <View style={styles.detailRow}>
                   <Icon name="check-circle" size={18} color="#10b981" />
-                  <Text style={styles.detailText}><Text style={styles.detailBold}>{sub.totalDays}</Text> Total Days</Text>
+                  <Text style={styles.detailText}>
+                    <Text style={styles.detailBold}>{sub.totalDays}</Text> Total
+                    Days
+                  </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Icon name="check-circle" size={18} color="#10b981" />
-                  <Text style={styles.detailText}><Text style={styles.detailBold}>{sub.extraDays}</Text> Bonus Days</Text>
+                  <Text style={styles.detailText}>
+                    <Text style={styles.detailBold}>{sub.extraDays}</Text> Bonus
+                    Days
+                  </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Icon name="check-circle" size={18} color="#10b981" />
@@ -1032,7 +1180,10 @@ const SuperUserDashboard = ({ navigation }) => {
               </View>
 
               <TouchableOpacity
-                style={[styles.purchaseButton, index === 1 ? styles.primaryButton : styles.secondaryButton]}
+                style={[
+                  styles.purchaseButton,
+                  index === 1 ? styles.primaryButton : styles.secondaryButton,
+                ]}
                 onPress={() => handlePurchaseClick(sub)}
               >
                 <Text style={styles.purchaseButtonText}>Get Started Now</Text>
@@ -1043,12 +1194,23 @@ const SuperUserDashboard = ({ navigation }) => {
 
         {/* Benefits Section */}
         <View style={styles.benefitsSection}>
-          <Text style={styles.sectionTitle}>What's Included in Super User Subscription?</Text>
+          <Text style={styles.sectionTitle}>
+            What's Included in Super User Subscription?
+          </Text>
           <View style={styles.benefitsGrid}>
             {benefits.map((benefit, index) => (
               <View key={index} style={styles.benefitCard}>
-                <View style={[styles.benefitIcon, { backgroundColor: benefit.color + '20' }]}>
-                  <Text style={[styles.benefitIconText, { color: benefit.color }]}>{benefit.icon}</Text>
+                <View
+                  style={[
+                    styles.benefitIcon,
+                    { backgroundColor: benefit.color + '20' },
+                  ]}
+                >
+                  <Text
+                    style={[styles.benefitIconText, { color: benefit.color }]}
+                  >
+                    {benefit.icon}
+                  </Text>
                 </View>
                 <Text style={styles.benefitTitle}>{benefit.title}</Text>
               </View>
@@ -1060,14 +1222,21 @@ const SuperUserDashboard = ({ navigation }) => {
         <View style={styles.usageSection}>
           <View style={styles.usageHeader}>
             <Text style={styles.usageHeaderIcon}>🔑</Text>
-            <Text style={styles.usageSectionTitle}>How to Use Your Super User ID</Text>
+            <Text style={styles.usageSectionTitle}>
+              How to Use Your Super User ID
+            </Text>
           </View>
-          <Text style={styles.usageSubtitle}>Follow these simple steps to unlock all premium features with your 6-digit Super User ID</Text>
+          <Text style={styles.usageSubtitle}>
+            Follow these simple steps to unlock all premium features with your
+            6-digit Super User ID
+          </Text>
 
           {usageSteps.map((step, index) => (
             <View key={index} style={styles.usageCard}>
               <View style={styles.usageCardHeader}>
-                <View style={[styles.stepNumber, { backgroundColor: step.color }]}>
+                <View
+                  style={[styles.stepNumber, { backgroundColor: step.color }]}
+                >
                   <Text style={styles.stepNumberText}>{step.number}</Text>
                 </View>
                 <Text style={styles.stepIcon}>{step.icon}</Text>
@@ -1099,8 +1268,13 @@ const SuperUserDashboard = ({ navigation }) => {
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2025/2026 Karnataka Ayan Wholesale Supply Enterprises. All Rights Reserved.</Text>
-          <Text style={styles.footerSubtext}>Empowering Minds, Developing India.</Text>
+          <Text style={styles.footerText}>
+            © 2025/2026 Karnataka Ayan Wholesale Supply Enterprises. All Rights
+            Reserved.
+          </Text>
+          <Text style={styles.footerSubtext}>
+            Empowering Minds, Developing India.
+          </Text>
         </View>
       </ScrollView>
 
@@ -1113,7 +1287,7 @@ const SuperUserDashboard = ({ navigation }) => {
       >
         <SafeAreaView style={styles.modalContainer}>
           <StatusBar backgroundColor="#667eea" barStyle="light-content" />
-          
+
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.modalCloseButton}
@@ -1138,31 +1312,43 @@ const SuperUserDashboard = ({ navigation }) => {
               contentContainerStyle={styles.modalScrollContent}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              onScrollBeginDrag={() =>
+                showGenderDropdown && setShowGenderDropdown(false)
+              }
             >
               {selectedSubscription && (
                 <View style={styles.planAlert}>
                   <View style={styles.planAlertRow}>
                     <Text style={styles.planAlertLabel}>Selected Plan:</Text>
-                    <Text style={styles.planAlertValue}>{selectedSubscription.month}-Month Plan</Text>
+                    <Text style={styles.planAlertValue}>
+                      {selectedSubscription.month}-Month Plan
+                    </Text>
                   </View>
                   <View style={styles.planAlertRow}>
                     <Text style={styles.planAlertLabel}>Amount:</Text>
-                    <Text style={styles.planAlertPrice}>₹{selectedSubscription.finalPrice}</Text>
+                    <Text style={styles.planAlertPrice}>
+                      ₹{selectedSubscription.finalPrice}
+                    </Text>
                   </View>
                   <View style={styles.planAlertRow}>
                     <Text style={styles.planAlertLabel}>Validity:</Text>
-                    <Text style={styles.planAlertValue}>{selectedSubscription.totalDays} days</Text>
+                    <Text style={styles.planAlertValue}>
+                      {selectedSubscription.totalDays} days
+                    </Text>
                   </View>
                 </View>
               )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Have a User ID? <Text style={styles.optionalBadge}>Optional</Text></Text>
+                <Text style={styles.inputLabel}>
+                  Have a User ID?{' '}
+                  <Text style={styles.optionalBadge}>Optional</Text>
+                </Text>
                 <View style={styles.userIdInputRow}>
                   <TextInput
                     style={[styles.textInput, { flex: 1, marginRight: 8 }]}
                     value={userId}
-                    onChangeText={(value) => {
+                    onChangeText={value => {
                       const numericValue = value.replace(/\D/g, '');
                       if (numericValue.length <= 6) {
                         setUserId(numericValue);
@@ -1174,7 +1360,11 @@ const SuperUserDashboard = ({ navigation }) => {
                     maxLength={6}
                   />
                   <TouchableOpacity
-                    style={[styles.verifyButton, (isCheckingUser || userId.length !== 6) && styles.buttonDisabled]}
+                    style={[
+                      styles.verifyButton,
+                      (isCheckingUser || userId.length !== 6) &&
+                        styles.buttonDisabled,
+                    ]}
                     onPress={handleUserIdCheck}
                     disabled={isCheckingUser || userId.length !== 6}
                   >
@@ -1185,13 +1375,18 @@ const SuperUserDashboard = ({ navigation }) => {
                     )}
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.inputHelp}>If you have purchased before, enter your User ID to auto-fill details</Text>
+                <Text style={styles.inputHelp}>
+                  If you have purchased before, enter your User ID to auto-fill
+                  details
+                </Text>
               </View>
 
               {isExistingUser && (
                 <View style={styles.successAlert}>
                   <Icon name="check-circle" size={20} color="#059669" />
-                  <Text style={styles.successAlertText}>User ID verified! Your details have been loaded.</Text>
+                  <Text style={styles.successAlertText}>
+                    User ID verified! Your details have been loaded.
+                  </Text>
                 </View>
               )}
 
@@ -1200,7 +1395,7 @@ const SuperUserDashboard = ({ navigation }) => {
                 <TextInput
                   style={styles.textInput}
                   value={userFormData.name}
-                  onChangeText={(value) => handleFormChange('name', value)}
+                  onChangeText={value => handleFormChange('name', value)}
                   placeholder="Enter full name"
                   placeholderTextColor="#9ca3af"
                 />
@@ -1212,7 +1407,7 @@ const SuperUserDashboard = ({ navigation }) => {
                   <TextInput
                     style={styles.textInput}
                     value={userFormData.age}
-                    onChangeText={(value) => handleFormChange('age', value)}
+                    onChangeText={value => handleFormChange('age', value)}
                     placeholder="Age"
                     keyboardType="numeric"
                     placeholderTextColor="#9ca3af"
@@ -1221,13 +1416,65 @@ const SuperUserDashboard = ({ navigation }) => {
 
                 <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
                   <Text style={styles.inputLabel}>Gender *</Text>
-                  <TextInput
-                    style={styles.textInput}
-                    value={userFormData.gender}
-                    onChangeText={(value) => handleFormChange('gender', value)}
-                    placeholder="Male/Female/Other"
-                    placeholderTextColor="#9ca3af"
-                  />
+                  <View style={styles.genderSelectorContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.genderSelector,
+                        !userFormData.gender && styles.genderPlaceholder,
+                      ]}
+                      onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+                    >
+                      <Text
+                        style={[
+                          styles.genderText,
+                          !userFormData.gender && styles.genderPlaceholderText,
+                        ]}
+                      >
+                        {userFormData.gender || 'Select Gender'}
+                      </Text>
+                      <Icon
+                        name={
+                          showGenderDropdown
+                            ? 'arrow-drop-up'
+                            : 'arrow-drop-down'
+                        }
+                        size={24}
+                        color="#3b82f6"
+                      />
+                    </TouchableOpacity>
+
+                    {showGenderDropdown && (
+                      <View style={styles.dropdownContainer}>
+                        <TouchableOpacity
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            handleFormChange('gender', 'Male');
+                            setShowGenderDropdown(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownText}>Male</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            handleFormChange('gender', 'Female');
+                            setShowGenderDropdown(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownText}>Female</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.dropdownItem}
+                          onPress={() => {
+                            handleFormChange('gender', 'Other');
+                            setShowGenderDropdown(false);
+                          }}
+                        >
+                          <Text style={styles.dropdownText}>Other</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
 
@@ -1236,7 +1483,7 @@ const SuperUserDashboard = ({ navigation }) => {
                 <TextInput
                   style={styles.textInput}
                   value={userFormData.phoneNo}
-                  onChangeText={(value) => handleFormChange('phoneNo', value)}
+                  onChangeText={value => handleFormChange('phoneNo', value)}
                   placeholder="Enter 10-digit phone number"
                   keyboardType="phone-pad"
                   maxLength={10}
@@ -1245,11 +1492,13 @@ const SuperUserDashboard = ({ navigation }) => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Email <Text style={styles.optionalBadge}>Optional</Text></Text>
+                <Text style={styles.inputLabel}>
+                  Email <Text style={styles.optionalBadge}>Optional</Text>
+                </Text>
                 <TextInput
                   style={styles.textInput}
                   value={userFormData.email}
-                  onChangeText={(value) => handleFormChange('email', value)}
+                  onChangeText={value => handleFormChange('email', value)}
                   placeholder="Enter email address"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -1263,7 +1512,7 @@ const SuperUserDashboard = ({ navigation }) => {
                   <TextInput
                     style={styles.textInput}
                     value={userFormData.district}
-                    onChangeText={(value) => handleFormChange('district', value)}
+                    onChangeText={value => handleFormChange('district', value)}
                     placeholder="Enter district"
                     placeholderTextColor="#9ca3af"
                   />
@@ -1274,7 +1523,7 @@ const SuperUserDashboard = ({ navigation }) => {
                   <TextInput
                     style={styles.textInput}
                     value={userFormData.state}
-                    onChangeText={(value) => handleFormChange('state', value)}
+                    onChangeText={value => handleFormChange('state', value)}
                     placeholder="E.g Karnataka"
                     placeholderTextColor="#9ca3af"
                   />
@@ -1284,14 +1533,24 @@ const SuperUserDashboard = ({ navigation }) => {
               <TouchableOpacity
                 style={[styles.proceedButton, loading && styles.buttonDisabled]}
                 onPress={handleProceedToPurchase}
-                disabled={loading || !userFormData.name || !userFormData.age || !userFormData.gender || !userFormData.phoneNo || !userFormData.district || !userFormData.state}
+                disabled={
+                  loading ||
+                  !userFormData.name ||
+                  !userFormData.age ||
+                  !userFormData.gender ||
+                  !userFormData.phoneNo ||
+                  !userFormData.district ||
+                  !userFormData.state
+                }
               >
                 {loading ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
                   <>
                     <Icon name="payment" size={20} color="#fff" />
-                    <Text style={styles.proceedButtonText}>Proceed to Payment</Text>
+                    <Text style={styles.proceedButtonText}>
+                      Proceed to Payment
+                    </Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -1324,40 +1583,60 @@ const SuperUserDashboard = ({ navigation }) => {
             {purchasedUserDetails && selectedSubscription && (
               <View style={styles.successModalBody}>
                 <View style={styles.celebrationAlert}>
-                  <Text style={styles.celebrationText}>🎉 Congratulations! Your super user subscription is now active!</Text>
+                  <Text style={styles.celebrationText}>
+                    🎉 Congratulations! Your super user subscription is now
+                    active!
+                  </Text>
                 </View>
 
                 <View style={styles.purchaseDetails}>
                   <View style={styles.purchaseDetailRow}>
                     <Text style={styles.detailLabel}>Name:</Text>
-                    <Text style={styles.detailValue}>{purchasedUserDetails.name}</Text>
+                    <Text style={styles.detailValue}>
+                      {purchasedUserDetails.name}
+                    </Text>
                   </View>
                   <View style={styles.purchaseDetailRow}>
                     <Text style={styles.detailLabel}>User ID:</Text>
                     <View style={styles.userIdBadge}>
-                      <Text style={styles.userIdBadgeText}>{purchasedUserDetails.userId}</Text>
+                      <Text style={styles.userIdBadgeText}>
+                        {purchasedUserDetails.userId}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.purchaseDetailRow}>
                     <Text style={styles.detailLabel}>Plan:</Text>
-                    <Text style={styles.detailValue}>{selectedSubscription.month}-Month Plan</Text>
+                    <Text style={styles.detailValue}>
+                      {selectedSubscription.month}-Month Plan
+                    </Text>
                   </View>
                   <View style={styles.purchaseDetailRow}>
                     <Text style={styles.detailLabel}>Amount Paid:</Text>
-                    <Text style={styles.amountPaid}>₹{selectedSubscription.finalPrice}</Text>
+                    <Text style={styles.amountPaid}>
+                      ₹{selectedSubscription.finalPrice}
+                    </Text>
                   </View>
                   <View style={styles.purchaseDetailRow}>
                     <Text style={styles.detailLabel}>Valid Until:</Text>
-                    <Text style={styles.expiryDate}>{purchaseExpiry && formatDate(purchaseExpiry)}</Text>
+                    <Text style={styles.expiryDate}>
+                      {purchaseExpiry && formatDate(purchaseExpiry)}
+                    </Text>
                   </View>
                 </View>
 
                 <View style={styles.downloadAlert}>
                   <Icon name="download" size={20} color="#0d6efd" />
                   <View style={styles.downloadAlertContent}>
-                    <Text style={styles.downloadAlertTitle}>Receipt Downloaded!</Text>
+                    <Text style={styles.downloadAlertTitle}>
+                      Receipt Downloaded!
+                    </Text>
                     <Text style={styles.downloadAlertText}>
-                      Your purchase receipt has been downloaded automatically. Keep your User ID <Text style={styles.boldText}>{purchasedUserDetails.userId}</Text> safe for future purchases!
+                      Your purchase receipt has been downloaded automatically.
+                      Keep your User ID{' '}
+                      <Text style={styles.boldText}>
+                        {purchasedUserDetails.userId}
+                      </Text>{' '}
+                      safe for future purchases!
                     </Text>
                   </View>
                 </View>
@@ -1369,7 +1648,9 @@ const SuperUserDashboard = ({ navigation }) => {
                     fetchSubscriptions();
                   }}
                 >
-                  <Text style={styles.closeSuccessButtonText}>Close & Continue</Text>
+                  <Text style={styles.closeSuccessButtonText}>
+                    Close & Continue
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -1404,7 +1685,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    paddingTop:50
+    paddingTop: 50,
   },
   headerBadge: {
     flexDirection: 'row',
@@ -2128,6 +2409,58 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  // Gender Dropdown Styles
+  genderSelectorContainer: {
+    position: 'relative',
+  },
+  genderSelector: {
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  genderText: {
+    fontSize: 15,
+    color: '#374151',
+  },
+  genderPlaceholder: {
+    // Style when no gender is selected
+  },
+  genderPlaceholderText: {
+    color: '#9ca3af',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    borderRadius: 10,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    marginTop: 2,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownText: {
+    fontSize: 15,
+    color: '#374151',
   },
 });
 

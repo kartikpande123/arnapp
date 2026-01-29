@@ -46,6 +46,7 @@ const PdfSyllabusPurchase = ({ route, navigation }) => {
   const [orderId, setOrderId] = useState(null);
   const [paymentId, setPaymentId] = useState(null);
   const [purchaseDate, setPurchaseDate] = useState(null);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   // Form data for new registration
   const [formData, setFormData] = useState({
@@ -102,10 +103,10 @@ const PdfSyllabusPurchase = ({ route, navigation }) => {
   }, [selectedSyllabus, navigation]);
 
   // Helper function to get logo base64 or URI
- const getBase64Logo = () => {
-  // This is your correct Firebase Storage public URL
-  return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
-};
+  const getBase64Logo = () => {
+    // This is your correct Firebase Storage public URL
+    return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
+  };
 
   // Format date for display
   const formatDate = date => {
@@ -1262,9 +1263,15 @@ const PdfSyllabusPurchase = ({ route, navigation }) => {
           >
             <ScrollView
               style={styles.scrollableContainer}
-              contentContainerStyle={[styles.scrollableContent, { paddingBottom: 113 }]}
+              contentContainerStyle={[
+                styles.scrollableContent,
+                { paddingBottom: 113 },
+              ]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              onScrollBeginDrag={() =>
+                showGenderDropdown && setShowGenderDropdown(false)
+              }
             >
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -1319,15 +1326,67 @@ const PdfSyllabusPurchase = ({ route, navigation }) => {
                       style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}
                     >
                       <Text style={styles.inputLabel}>Gender *</Text>
-                      <TextInput
-                        style={styles.textInput}
-                        value={formData.gender}
-                        onChangeText={value =>
-                          handleFormChange('gender', value)
-                        }
-                        placeholder="E.g Male, Female, Other"
-                        placeholderTextColor="#9ca3af"
-                      />
+                      <View style={styles.genderSelectorContainer}>
+                        <TouchableOpacity
+                          style={[
+                            styles.genderSelector,
+                            !formData.gender && styles.genderPlaceholder,
+                          ]}
+                          onPress={() =>
+                            setShowGenderDropdown(!showGenderDropdown)
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.genderText,
+                              !formData.gender && styles.genderPlaceholderText,
+                            ]}
+                          >
+                            {formData.gender || 'Select Gender'}
+                          </Text>
+                          <Icon
+                            name={
+                              showGenderDropdown
+                                ? 'arrow-drop-up'
+                                : 'arrow-drop-down'
+                            }
+                            size={24}
+                            color="#1a3b5d"
+                          />
+                        </TouchableOpacity>
+
+                        {showGenderDropdown && (
+                          <View style={styles.dropdownContainer}>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Male');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Male</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Female');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Female</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Other');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Other</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
                     </View>
                   </View>
 
@@ -2071,6 +2130,58 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: 8,
     flex: 1,
+  },
+  // Gender Dropdown Styles
+  genderSelectorContainer: {
+    position: 'relative',
+  },
+  genderSelector: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  genderPlaceholder: {
+    // Style when no gender is selected
+  },
+  genderPlaceholderText: {
+    color: '#9ca3af',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    marginTop: 2,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#374151',
   },
 });
 

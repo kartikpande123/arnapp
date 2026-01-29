@@ -43,6 +43,7 @@ const PracticeTestPurchase = ({ route, navigation }) => {
   const [isPurchased, setIsPurchased] = useState(false);
   const [expirationDate, setExpirationDate] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
 
   // Form data for new registration
   const [formData, setFormData] = useState({
@@ -66,9 +67,9 @@ const PracticeTestPurchase = ({ route, navigation }) => {
 
   // Helper function to get logo base64 or URI
   const getBase64Logo = () => {
-  // This is your correct Firebase Storage public URL
-  return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
-};
+    // This is your correct Firebase Storage public URL
+    return 'https://firebasestorage.googleapis.com/v0/b/exam-web-749cd.firebasestorage.app/o/logo%2FLOGO.jpg?alt=media&token=700951a7-726f-4f2c-8b88-3cf9edf9d82f';
+  };
 
   // Format date for display
   const formatDate = date => {
@@ -631,18 +632,18 @@ const PracticeTestPurchase = ({ route, navigation }) => {
   };
 
   // Fix for phone number autofill issue
-  const handlePhoneNumberChange = (value) => {
+  const handlePhoneNumberChange = value => {
     // Clear age field if it was autofilled with phone number data
     if (formData.age === value) {
       setFormData(prev => ({
         ...prev,
-        age: ''
+        age: '',
       }));
     }
-    
+
     setFormData(prev => ({
       ...prev,
-      phoneNo: value
+      phoneNo: value,
     }));
   };
 
@@ -956,16 +957,22 @@ const PracticeTestPurchase = ({ route, navigation }) => {
 
       case 'newRegistration':
         return (
-          <KeyboardAvoidingView 
-            style={styles.stageContainer} 
+          <KeyboardAvoidingView
+            style={styles.stageContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
           >
-            <ScrollView 
+            <ScrollView
               style={styles.scrollableContainer}
-              contentContainerStyle={[styles.scrollableContent, { paddingBottom: 113 }]}
+              contentContainerStyle={[
+                styles.scrollableContent,
+                { paddingBottom: 113 },
+              ]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              onScrollBeginDrag={() =>
+                showGenderDropdown && setShowGenderDropdown(false)
+              }
             >
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -1016,15 +1023,71 @@ const PracticeTestPurchase = ({ route, navigation }) => {
                       />
                     </View>
 
-                    <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                    <View
+                      style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}
+                    >
                       <Text style={styles.inputLabel}>Gender *</Text>
-                      <TextInput
-                        style={styles.textInput}
-                        value={formData.gender}
-                        onChangeText={value => handleFormChange('gender', value)}
-                        placeholder="E.g Male, Female, Other"
-                        placeholderTextColor="#9ca3af"
-                      />
+                      <View style={styles.genderSelectorContainer}>
+                        <TouchableOpacity
+                          style={[
+                            styles.genderSelector,
+                            !formData.gender && styles.genderPlaceholder,
+                          ]}
+                          onPress={() =>
+                            setShowGenderDropdown(!showGenderDropdown)
+                          }
+                        >
+                          <Text
+                            style={[
+                              styles.genderText,
+                              !formData.gender && styles.genderPlaceholderText,
+                            ]}
+                          >
+                            {formData.gender || 'Select Gender'}
+                          </Text>
+                          <Icon
+                            name={
+                              showGenderDropdown
+                                ? 'arrow-drop-up'
+                                : 'arrow-drop-down'
+                            }
+                            size={24}
+                            color="#1a3b5d"
+                          />
+                        </TouchableOpacity>
+
+                        {showGenderDropdown && (
+                          <View style={styles.dropdownContainer}>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Male');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Male</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Female');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Female</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.dropdownItem}
+                              onPress={() => {
+                                handleFormChange('gender', 'Other');
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              <Text style={styles.dropdownText}>Other</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
                     </View>
                   </View>
 
@@ -1070,7 +1133,9 @@ const PracticeTestPurchase = ({ route, navigation }) => {
                       />
                     </View>
 
-                    <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                    <View
+                      style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}
+                    >
                       <Text style={styles.inputLabel}>State *</Text>
                       <TextInput
                         style={styles.textInput}
@@ -1358,7 +1423,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    paddingTop:50,
+    paddingTop: 50,
   },
   headerBackButton: {
     padding: 8,
@@ -1723,6 +1788,58 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginLeft: 8,
+  },
+  // Add these at the end of your StyleSheet.create:
+  genderSelectorContainer: {
+    position: 'relative',
+  },
+  genderSelector: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  genderPlaceholder: {
+    // Style when no gender is selected
+  },
+  genderPlaceholderText: {
+    color: '#9ca3af',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    marginTop: 2,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#374151',
   },
 });
 
