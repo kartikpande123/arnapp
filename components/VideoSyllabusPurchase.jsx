@@ -47,6 +47,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   const [paymentId, setPaymentId] = useState(null);
   const [purchaseDate, setPurchaseDate] = useState(null);
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -113,6 +114,35 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
       minute: '2-digit',
       hour12: true,
     });
+  };
+  // Validation functions - only email and phone
+  const validateEmail = email => {
+    if (email && email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+    return true; // Email is optional, so empty is valid
+  };
+
+  const validatePhoneNumber = phone => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    // Only validate email and phone
+    if (formData.email.trim() && !validateEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (formData.phoneNo.trim() && !validatePhoneNumber(formData.phoneNo)) {
+      errors.phoneNo = 'Phone number must be 10 digits';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Generate Student Details PDF HTML
@@ -660,10 +690,30 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   };
 
   const handlePhoneNumberChange = value => {
-    if (formData.age === value) {
-      setFormData(prev => ({ ...prev, age: '' }));
+    // Only allow numbers
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    // Clear errors for phone number when user types
+    if (formErrors.phoneNo) {
+      setFormErrors(prev => ({ ...prev, phoneNo: '' }));
     }
-    setFormData(prev => ({ ...prev, phoneNo: value }));
+
+    setFormData(prev => ({
+      ...prev,
+      phoneNo: numericValue.slice(0, 10), // Limit to 10 digits
+    }));
+  };
+
+  const handleEmailChange = value => {
+    // Clear errors for email when user types
+    if (formErrors.email) {
+      setFormErrors(prev => ({ ...prev, email: '' }));
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      email: value,
+    }));
   };
 
   // Verify Student ID
@@ -814,22 +864,12 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
   };
 
   const handleProceedToSyllabusDetails = () => {
-    if (
-      !formData.name ||
-      !formData.age ||
-      !formData.gender ||
-      !formData.phoneNo ||
-      !formData.district ||
-      !formData.state
-    ) {
-      Alert.alert('Error', 'Please fill in all required fields.');
-      return;
-    }
-
-    if (isEditingExistingData) {
-      handleUpdateStudentDetails();
-    } else {
-      setStage('syllabusDetails');
+    if (validateForm()) {
+      if (isEditingExistingData) {
+        handleUpdateStudentDetails();
+      } else {
+        setStage('syllabusDetails');
+      }
     }
   };
 
@@ -1358,7 +1398,10 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Phone Number *</Text>
                     <TextInput
-                      style={styles.textInput}
+                      style={[
+                        styles.textInput,
+                        formErrors.phoneNo && styles.inputError,
+                      ]}
                       value={formData.phoneNo}
                       onChangeText={handlePhoneNumberChange}
                       placeholder="Enter 10-digit phone number"
@@ -1366,19 +1409,39 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                       maxLength={10}
                       placeholderTextColor="#9ca3af"
                     />
+                    {formErrors.phoneNo ? (
+                      <Text style={styles.errorMessageText}>
+                        {formErrors.phoneNo}
+                      </Text>
+                    ) : (
+                      <Text style={styles.inputHelp}>
+                        Enter 10-digit number without country code
+                      </Text>
+                    )}
                   </View>
-
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Email (Optional)</Text>
                     <TextInput
-                      style={styles.textInput}
+                      style={[
+                        styles.textInput,
+                        formErrors.email && styles.inputError,
+                      ]}
                       value={formData.email}
-                      onChangeText={value => handleFormChange('email', value)}
+                      onChangeText={handleEmailChange}
                       placeholder="Enter email address"
                       keyboardType="email-address"
                       autoCapitalize="none"
                       placeholderTextColor="#9ca3af"
                     />
+                    {formErrors.email ? (
+                      <Text style={styles.errorMessageText}>
+                        {formErrors.email}
+                      </Text>
+                    ) : (
+                      <Text style={styles.inputHelp}>
+                        Leave blank if you don't have an email
+                      </Text>
+                    )}
                   </View>
 
                   <View style={styles.inputRow}>
@@ -1410,7 +1473,6 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                       />
                     </View>
                   </View>
-
                   <TouchableOpacity
                     style={[
                       styles.primaryButton,
@@ -1419,7 +1481,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                         !formData.gender ||
                         !formData.phoneNo ||
                         !formData.district ||
-                        !formData.state) &&
+                        !formData.state ||
+                        formErrors.email ||
+                        formErrors.phoneNo) &&
                         styles.buttonDisabled,
                     ]}
                     onPress={handleProceedToSyllabusDetails}
@@ -1429,7 +1493,9 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                       !formData.gender ||
                       !formData.phoneNo ||
                       !formData.district ||
-                      !formData.state
+                      !formData.state ||
+                      !!formErrors.email ||
+                      !!formErrors.phoneNo
                     }
                   >
                     <Icon name="arrow-forward" size={20} color="#fff" />
@@ -1437,7 +1503,6 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                       Proceed to Syllabus Details
                     </Text>
                   </TouchableOpacity>
-
                   {isEditingExistingData && (
                     <TouchableOpacity
                       style={styles.outlineButton}
@@ -1448,6 +1513,7 @@ const VideoSyllabusPurchase = ({ route, navigation }) => {
                       </Text>
                     </TouchableOpacity>
                   )}
+                     <View style={{ height: 100 }} />
                 </View>
               </View>
             </ScrollView>
@@ -2101,57 +2167,67 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   // Gender Dropdown Styles
-genderSelectorContainer: {
-  position: 'relative',
-},
-genderSelector: {
-  borderWidth: 1,
-  borderColor: '#d1d5db',
-  borderRadius: 8,
-  backgroundColor: '#fff',
-  height: 50,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  paddingHorizontal: 12,
-},
-genderText: {
-  fontSize: 16,
-  color: '#374151',
-},
-genderPlaceholder: {
-  // Style when no gender is selected
-},
-genderPlaceholderText: {
-  color: '#9ca3af',
-},
-dropdownContainer: {
-  position: 'absolute',
-  top: 52,
-  left: 0,
-  right: 0,
-  backgroundColor: '#fff',
-  borderWidth: 1,
-  borderColor: '#d1d5db',
-  borderRadius: 8,
-  zIndex: 1000,
-  elevation: 5,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 3.84,
-  marginTop: 2,
-},
-dropdownItem: {
-  paddingHorizontal: 12,
-  paddingVertical: 14,
-  borderBottomWidth: 1,
-  borderBottomColor: '#f1f5f9',
-},
-dropdownText: {
-  fontSize: 16,
-  color: '#374151',
-},
+  genderSelectorContainer: {
+    position: 'relative',
+  },
+  genderSelector: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  genderText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  genderPlaceholder: {
+    // Style when no gender is selected
+  },
+  genderPlaceholderText: {
+    color: '#9ca3af',
+  },
+  dropdownContainer: {
+    position: 'absolute',
+    top: 52,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    marginTop: 2,
+  },
+  dropdownItem: {
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#374151',
+  },
+  inputError: {
+    borderColor: '#dc2626',
+    borderWidth: 2,
+  },
+  errorMessageText: {
+    color: '#dc2626',
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '500',
+  },
 });
 
 export default VideoSyllabusPurchase;

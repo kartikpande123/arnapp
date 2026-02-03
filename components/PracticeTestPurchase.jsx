@@ -44,6 +44,7 @@ const PracticeTestPurchase = ({ route, navigation }) => {
   const [expirationDate, setExpirationDate] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   // Form data for new registration
   const [formData, setFormData] = useState({
@@ -633,18 +634,77 @@ const PracticeTestPurchase = ({ route, navigation }) => {
 
   // Fix for phone number autofill issue
   const handlePhoneNumberChange = value => {
-    // Clear age field if it was autofilled with phone number data
-    if (formData.age === value) {
-      setFormData(prev => ({
-        ...prev,
-        age: '',
-      }));
+    // Only allow numbers
+    const numericValue = value.replace(/[^0-9]/g, '');
+
+    // Clear errors for phone number when user types
+    if (formErrors.phoneNo) {
+      setFormErrors(prev => ({ ...prev, phoneNo: '' }));
     }
 
     setFormData(prev => ({
       ...prev,
-      phoneNo: value,
+      phoneNo: numericValue.slice(0, 10), // Limit to 10 digits
     }));
+  };
+
+  const handleEmailChange = value => {
+    // Clear errors for email when user types
+    if (formErrors.email) {
+      setFormErrors(prev => ({ ...prev, email: '' }));
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      email: value,
+    }));
+  };
+
+  // Validation functions
+  const validateEmail = email => {
+    if (email && email.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+    return true; // Email is optional, so empty is valid
+  };
+
+  const validatePhoneNumber = phone => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    // Required fields validation
+    if (!formData.name.trim()) errors.name = 'Name is required';
+    if (!formData.age.trim()) errors.age = 'Age is required';
+    if (!formData.gender) errors.gender = 'Gender is required';
+    if (!formData.phoneNo.trim()) errors.phoneNo = 'Phone number is required';
+    if (!formData.district.trim()) errors.district = 'District is required';
+    if (!formData.state.trim()) errors.state = 'State is required';
+
+    // Email validation (optional but must be valid if provided)
+    if (formData.email.trim() && !validateEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    // Phone number validation
+    if (formData.phoneNo.trim() && !validatePhoneNumber(formData.phoneNo)) {
+      errors.phoneNo = 'Phone number must be 10 digits';
+    }
+
+    // Age validation (must be number between 1 and 120)
+    if (formData.age.trim()) {
+      const ageNum = parseInt(formData.age);
+      if (isNaN(ageNum) || ageNum < 1 || ageNum > 120) {
+        errors.age = 'Please enter a valid age (1-120)';
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Verify Student ID
@@ -1094,7 +1154,10 @@ const PracticeTestPurchase = ({ route, navigation }) => {
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Phone Number *</Text>
                     <TextInput
-                      style={styles.textInput}
+                      style={[
+                        styles.textInput,
+                        formErrors.phoneNo && styles.inputError,
+                      ]}
                       value={formData.phoneNo}
                       onChangeText={handlePhoneNumberChange}
                       placeholder="Enter 10-digit phone number"
@@ -1102,19 +1165,40 @@ const PracticeTestPurchase = ({ route, navigation }) => {
                       maxLength={10}
                       placeholderTextColor="#9ca3af"
                     />
+                    {formErrors.phoneNo ? (
+                      <Text style={styles.errorMessageText}>
+                        {formErrors.phoneNo}
+                      </Text>
+                    ) : (
+                      <Text style={styles.inputHelp}>
+                        Enter 10-digit number without country code
+                      </Text>
+                    )}
                   </View>
 
                   <View style={styles.inputGroup}>
                     <Text style={styles.inputLabel}>Email (Optional)</Text>
                     <TextInput
-                      style={styles.textInput}
+                      style={[
+                        styles.textInput,
+                        formErrors.email && styles.inputError,
+                      ]}
                       value={formData.email}
-                      onChangeText={value => handleFormChange('email', value)}
+                      onChangeText={handleEmailChange}
                       placeholder="Enter email address"
                       keyboardType="email-address"
                       autoCapitalize="none"
                       placeholderTextColor="#9ca3af"
                     />
+                    {formErrors.email ? (
+                      <Text style={styles.errorMessageText}>
+                        {formErrors.email}
+                      </Text>
+                    ) : (
+                      <Text style={styles.inputHelp}>
+                        Leave blank if you don't have an email
+                      </Text>
+                    )}
                   </View>
 
                   <View style={styles.inputRow}>
@@ -1155,17 +1239,25 @@ const PracticeTestPurchase = ({ route, navigation }) => {
                         !formData.gender ||
                         !formData.phoneNo ||
                         !formData.district ||
-                        !formData.state) &&
+                        !formData.state ||
+                        formErrors.email ||
+                        formErrors.phoneNo) &&
                         styles.buttonDisabled,
                     ]}
-                    onPress={() => setStage('examDetails')}
+                    onPress={() => {
+                      if (validateForm()) {
+                        setStage('examDetails');
+                      }
+                    }}
                     disabled={
                       !formData.name ||
                       !formData.age ||
                       !formData.gender ||
                       !formData.phoneNo ||
                       !formData.district ||
-                      !formData.state
+                      !formData.state ||
+                      !!formErrors.email ||
+                      !!formErrors.phoneNo
                     }
                   >
                     <Icon name="arrow-forward" size={20} color="#fff" />
@@ -1840,6 +1932,16 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontSize: 16,
     color: '#374151',
+  },
+  inputError: {
+    borderColor: '#dc2626',
+    borderWidth: 2,
+  },
+  errorMessageText: {
+    color: '#dc2626',
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '500',
   },
 });
 
