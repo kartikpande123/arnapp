@@ -23,8 +23,8 @@ android {
         applicationId "com.arnapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9
-        versionName "1.1.0"
+        versionCode 11
+        versionName "1.1.1"
 
         externalNativeBuild {
             cmake {
